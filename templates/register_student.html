@@ -1,0 +1,38 @@
+{% extends "base_administrator.html" %}
+{% block title %}Регистрация ученика{% endblock %}
+{% block content %}
+<h2>Регистрация ученика</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <label for="surname">Фамилия:</label>
+    {{ form.surname(class="input") }}
+    <label for="first_name">Имя:</label>
+    {{ form.first_name(class="input") }}
+    <label for="patronymic">Отчество:</label>
+    {{ form.patronymic(class="input") }}
+    <label for="email">Email:</label>
+    {{ form.email(class="input") }}
+    <label for="password">Пароль:</label>
+    {{ form.password(class="input") }}
+    <label for="confirm_password">Подтвердите пароль:</label>
+    {{ form.confirm_password(class="input") }}
+    <label for="birth_date">Дата рождения:</label>
+    {{ form.birth_date(class="input") }}
+    <label for="phone">Телефон:</label>
+    {{ form.phone(class="input") }}
+    <label for="address">Адрес:</label>
+    {{ form.address(class="input") }}
+    <h3>Данные клиента</h3>
+    <label for="client_name">Имя клиента:</label>
+    {{ form.client_name(class="input") }}
+    <label for="client_relation">Связь с клиентом:</label>
+    {{ form.client_relation(class="input") }}
+    <label for="client_phone">Телефон клиента:</label>
+    {{ form.client_phone(class="input") }}
+    <label for="client_workplace">Место работы клиента:</label>
+    {{ form.client_workplace(class="input") }}
+    <label for="client_position">Должность клиента:</label>
+    {{ form.client_position(class="input") }}
+    <button type="submit" class="btn">Зарегистрировать ученика</button>
+</form>
+{% endblock %}

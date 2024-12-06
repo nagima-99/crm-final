@@ -1,0 +1,18 @@
+<form method="POST" action="{{ url_for('add_course') }}">
+    {{ form.hidden_tag() }}
+    <div>
+        <label for="course_name">Course Name</label>
+        {{ form.course_name }}
+    </div>
+    <div>
+        <label for="academic_hours">Academic Hours</label>
+        {{ form.academic_hours }}
+    </div>
+    <div>
+        <label for="price">Price</label>
+        {{ form.price }}
+    </div>
+    <div>
+        <button type="submit">{{ form.submit }}</button>
+    </div>
+</form>

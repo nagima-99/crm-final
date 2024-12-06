@@ -1,0 +1,46 @@
+{% extends "base_administrator.html" %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<main>
+    <section class="profile">
+        <h2>Информация об {{ administrator.first_name }} {{ administrator.surname }}</h2>
+        <ul>
+            <li><strong>Дата рождения:</strong> {{ administrator.birth_date }}</li>
+            <li><strong>Возраст:</strong> {{ age }}</li>
+            <li><strong>Телефон:</strong> {{ administrator.phone or "Не указано" }}</li>
+            <li><strong>Адрес:</strong> {{ administrator.address or "Не указано" }}</li>
+            <li><strong>Название офиса:</strong> {{ administrator.office_name }}</li>
+            <li><strong>Адрес офиса:</strong> {{ administrator.office_address }}</li>
+        </ul>
+    </section>
+
+    <section class="update-form">
+        <h2>Обновите вашу информацию</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <label for="surname">Фамилия:</label>
+            {{ form.surname(class="input") }}
+
+            <label for="first_name">Имя:</label>
+            {{ form.first_name(class="input") }}
+
+            <label for="patronymic">Отчество:</label>
+            {{ form.patronymic(class="input") }}
+
+            <label for="phone">Телефон:</label>
+            {{ form.phone(class="input") }}
+
+            <label for="address">Адрес:</label>
+            {{ form.address(class="input") }}
+
+            <label for="office_name">Название офиса:</label>
+            {{ form.office_name(class="input") }}
+
+            <label for="office_address">Адрес офиса:</label>
+            {{ form.office_address(class="input") }}
+
+            <button type="submit" class="btn">Сохранить изменения</button>
+        </form>
+    </section>
+</main>
+{% endblock %}

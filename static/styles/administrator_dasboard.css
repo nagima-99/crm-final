@@ -1,0 +1,35 @@
+/* Dashboard-specific styles */
+
+.container {
+    flex-direction: row;
+}
+
+.profile, .update-form {
+    width: 100%;
+    margin: 10px;
+}
+
+aside ul li {
+    margin-bottom: 12px;
+}
+
+.update-form {
+    background-color: #f9f9f9;
+    border-left: 5px solid #0044cc;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* Add some more spacing to the form buttons */
+.update-form .btn {
+    padding: 12px 25px;
+    font-size: 1.2em;
+}
+
+footer {
+    background-color: #333;
+    color: #ffffff;
+    text-align: center;
+    padding: 15px;
+    font-size: 1.2em;
+}

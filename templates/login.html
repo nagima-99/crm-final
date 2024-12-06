@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/login.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-left">
+                <h2>Вход в личный кабинет</h2>
+                <h1>VIVACRM</h1>
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="input-group">
+                        <input type="email" id="email" name="email" placeholder="E-mail" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="password" name="password" placeholder="Пароль" required>
+                    </div>
+                    <button type="submit" class="sign-in-btn">Войти в кабинет</button>
+                </form>
+            </div>
+            <div class="login-right">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

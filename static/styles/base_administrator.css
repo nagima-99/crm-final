@@ -1,0 +1,163 @@
+/* Base reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Global Styles */
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+/* Header Styles */
+header {
+  background-color: #0044cc;
+  padding: 20px;
+  text-align: center;
+  color: white;
+}
+
+.header-title {
+  font-size: 2.5em;
+  font-weight: bold;
+}
+
+/* Footer Styles */
+footer {
+  text-align: center;
+  padding: 10px;
+  background-color: #333;
+  color: white;
+}
+
+/* Layout: Container */
+.container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* Sidebar Styles */
+aside {
+  width: 250px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+}
+
+aside ul {
+  list-style-type: none;
+}
+
+aside li {
+  margin: 15px 0;
+}
+
+aside a {
+  text-decoration: none;
+  color: #0044cc;
+  font-weight: bold;
+}
+
+aside a:hover {
+  color: #0077ff;
+}
+
+/* Main Content */
+main {
+  flex: 1;
+  padding-left: 30px;
+}
+
+/* Profile Section */
+.profile {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.profile h2 {
+  font-size: 1.8em;
+  color: #0044cc;
+  margin-bottom: 15px;
+}
+
+.profile ul {
+  list-style-type: none;
+}
+
+.profile li {
+  margin-bottom: 10px;
+}
+
+/* Update Form */
+.update-form {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.update-form h2 {
+  font-size: 1.8em;
+  color: #0044cc;
+  margin-bottom: 20px;
+}
+
+.update-form label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 1em;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #0044cc;
+}
+
+.btn {
+  background-color: #0044cc;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #0055cc;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .container {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  aside {
+      width: 100%;
+      margin-bottom: 20px;
+  }
+
+  main {
+      padding-left: 0;
+  }
+}

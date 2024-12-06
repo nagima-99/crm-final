@@ -1,0 +1,19 @@
+{% extends "base_administrator.html" %}
+
+{% block title %}Добавить группу{% endblock %}
+
+{% block content %}
+<h2>Добавить новую группу</h2>
+
+<form method="POST" action="{{ url_for('add_group') }}">
+    {{ form.hidden_tag() }}
+    
+    <div>
+        <label for="group_name">Название группы:</label>
+        {{ form.group_name() }}
+    </div>
+    <div>
+        <button type="submit">Сохранить</button>
+    </div>
+</form>
+{% endblock %}

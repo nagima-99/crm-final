@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/base_administrator.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/administrator_dasboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/register_student.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/register_teacher.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course.css') }}">
+    <title>{% block title %}CRM{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1 class="header-title">VIVACRM</h1>
+    </header>
+
+    <div class="container">
+        <aside>
+            <ul>
+                <li><a href="{{ url_for('administrator_dashboard', id=administrator.id) }}">Профиль</a></li>
+                <li><a href="{{ url_for('register_student') }}">Регистрация ученика</a></li>
+                <li><a href="{{ url_for('register_teacher') }}">Регистрация преподавателя</a></li>
+                <li><a href="{{ url_for('list_courses') }}">Курсы</a></li>
+                <li><a href="{{ url_for('list_groups') }}">Группы</a></li>
+            </ul>
+        </aside>
+
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; CRM 2024</p>
+    </footer>
+</body>
+</html>
