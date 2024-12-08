@@ -1,16 +1,22 @@
+{% extends "base_administrator.html" %}
+
+{% block title %}Редактировать курс{% endblock %}
+
+{% block content %}
 <form method="POST" action="{{ url_for('edit_course', id=course.id) }}">
     {{ form.hidden_tag() }}
     <div>
-        <label for="course_name">Course Name</label>
+        <label for="course_name">Название курса:</label>
         {{ form.course_name() }}
     </div>
     <div>
-        <label for="academic_hours">Academic Hours</label>
+        <label for="academic_hours">Академические часы</label>
         {{ form.academic_hours() }}
     </div>
     <div>
-        <label for="price">Price</label>
+        <label for="price">Абонемент</label>
         {{ form.price() }}
     </div>
-    <button type="submit">Save Changes</button>
+    <button type="submit">Сохранить изменения</button>
 </form>
+{% endblock %}

@@ -1,3 +1,8 @@
+{% extends "base_administrator.html" %}
+
+{% block title %}Редактировать группу{% endblock %}
+
+{% block content %}
 <form method="POST" action="{{ url_for('add_course') }}">
     {{ form.hidden_tag() }}
     <div>
@@ -16,3 +21,4 @@
         <button type="submit">{{ form.submit }}</button>
     </div>
 </form>
+{% endblock %}

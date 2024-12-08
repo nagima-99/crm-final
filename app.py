@@ -197,20 +197,28 @@ def register_teacher():
 @role_required('Администратор')
 def add_course():
     form = CourseForm()
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     if form.validate_on_submit():
-        course = Course(course_name=form.course_name.data, 
-                        academic_hours=form.academic_hours.data,
-                        price=form.price.data)
-        db.session.add(course)
-        db.session.commit()
-        return redirect(url_for('list_courses'))
-    return render_template('add_course.html', form=form)
+        # Проверка на уникальность названия курса
+        existing_course = Course.query.filter_by(course_name=form.course_name.data).first()
+        if existing_course:
+            # Если курс с таким именем уже существует, отобразить сообщение об ошибке
+            form.course_name.errors.append("Курс с таким названием уже существует. Пожалуйста, выберите другое название.")
+        else:
+            course = Course(course_name=form.course_name.data, 
+                            academic_hours=form.academic_hours.data,
+                            price=form.price.data)
+            db.session.add(course)
+            db.session.commit()
+            return redirect(url_for('list_courses'))
+    return render_template('add_course.html', form=form, administrator=administrator)
 
 # Редактировать курс
 @app.route('/edit_course/<int:id>', methods=['GET', 'POST'])
 @login_required
 @role_required('Администратор')
 def edit_course(id):
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     course = Course.query.get_or_404(id)
     form = CourseForm(obj=course)
     if form.validate_on_submit():
@@ -219,7 +227,7 @@ def edit_course(id):
         course.price = form.price.data
         db.session.commit()
         return redirect(url_for('list_courses'))
-    return render_template('edit_course.html', form=form, course=course)
+    return render_template('edit_course.html', form=form, course=course, administrator=administrator)
 
 @app.route('/delete_course/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -241,7 +249,6 @@ def list_courses():
     return render_template('courses.html', courses=courses, administrator=administrator)
 
 
-
 # Добавить новую группу
 @app.route('/add_group', methods=['GET', 'POST'])
 @login_required
@@ -251,10 +258,14 @@ def add_group():
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()  # Извлекаем объект администратора
 
     if form.validate_on_submit():
-        group = Group(group_name=form.group_name.data)  # Допустим, у группы есть название и описание
-        db.session.add(group)
-        db.session.commit()
-        return redirect(url_for('list_groups'))
+        existing_group = Group.query.filter_by(group_name=form.group_name.data).first()
+        if existing_group:
+            form.group_name.errors.append("Группа с таким названием уже существует. Пожалуйста, выберите другое название.")
+        else:
+            group = Group(group_name=form.group_name.data)  # Допустим, у группы есть название
+            db.session.add(group)
+            db.session.commit()
+            return redirect(url_for('list_groups'))
     return render_template('add_group.html', form=form, administrator=administrator)
 
 # Редактировать группу
@@ -264,11 +275,13 @@ def add_group():
 def edit_group(id):
     group = Group.query.get_or_404(id)
     form = GroupForm(obj=group)
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()  # Извлекаем объект администратора
+
     if form.validate_on_submit():
         group.group_name = form.group_name.data
         db.session.commit()
         return redirect(url_for('list_groups'))
-    return render_template('edit_group.html', form=form, group=group)
+    return render_template('edit_group.html', form=form, group=group, administrator=administrator)
 
 @app.route('/delete_group/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -287,7 +300,6 @@ def list_groups():
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     groups = Group.query.all()
     return render_template('groups.html', groups=groups, administrator=administrator)
-
 
 
 # Страница выхода
