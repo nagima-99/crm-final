@@ -1,16 +1,7 @@
-/* Общие стили */
-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
-}
-
-/* Контейнер формы */
-form {
-    max-width: 600px;
+/* Стили для формы регистрации ученика */
+.register-student-form {
+    /* Контейнер формы */
+    width: 100%;
     margin: 20px auto;
     padding: 20px;
     background: #ffffff;
@@ -19,21 +10,37 @@ form {
 }
 
 /* Стили заголовков */
-h2, h3 {
+.register-student-form h2,
+.register-student-form h3 {
     text-align: center;
     margin-bottom: 20px;
     color: #444;
 }
 
 /* Стили для меток (label) */
-label {
+.register-student-form label {
     display: block;
     margin: 10px 0 5px;
     font-weight: bold;
 }
 
+/* Контейнеры для строк и столбцов */
+.register-student-form .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Колонки формы */
+.register-student-form .form-column {
+    flex: 1;
+    min-width: calc(50% - 10px);
+    max-width: 48%;
+}
+
 /* Стили для полей ввода */
-.input {
+.register-student-form .input {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
@@ -44,10 +51,8 @@ label {
 }
 
 /* Стили кнопки */
-.btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
+.register-student-form .btn {
+    padding: 10px 20px;
     background-color: #007bff;
     color: white;
     border: none;
@@ -56,16 +61,26 @@ label {
     font-size: 16px;
     text-align: center;
     transition: background-color 0.3s ease;
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.btn:hover {
+.register-student-form .btn:hover {
     background-color: #0056b3;
 }
 
 /* Стили для заголовка секции "Данные клиента" */
-h3 {
+.register-student-form h3 {
     margin-top: 30px;
     border-top: 1px solid #ccc;
     padding-top: 15px;
 }
 
+/* Стиль на мобильных устройствах для одного столбца */
+@media (max-width: 768px) {
+    .register-student-form .form-column {
+        min-width: 100%;
+    }
+}

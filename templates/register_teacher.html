@@ -1,41 +1,72 @@
 {% extends "base_administrator.html" %}
 {% block title %}Регистрация преподавателя{% endblock %}
 {% block content %}
-<h2>Регистрация преподавателя</h2>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <label for="surname">Фамилия:</label>
-    {{ form.surname(class="input") }}
-    <label for="first_name">Имя:</label>
-    {{ form.first_name(class="input") }}
-    <label for="patronymic">Отчество:</label>
-    {{ form.patronymic(class="input") }}
-    <label for="email">Email:</label>
-    {{ form.email(class="input") }}
-    <label for="password">Пароль:</label>
-    {{ form.password(class="input") }}
-    <label for="confirm_password">Подтвердите пароль:</label>
-    {{ form.confirm_password(class="input") }}
-    <label for="birth_date">Дата рождения:</label>
-    {{ form.birth_date(class="input") }}
-    <label for="phone">Телефон:</label>
-    {{ form.phone(class="input") }}
-    <label for="address">Адрес:</label>
-    {{ form.address(class="input") }}
-    <label for="education">Образование:</label>
-    {{ form.education(class="input") }}
-    <button type="submit" class="btn">Зарегистрировать преподавателя</button>
-</form>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="flashed-messages">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }}" role="alert">
-          {{ message }}
+<div class="register-teacher-form">
+    <h2>Регистрация преподавателя</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-row">
+            <div class="form-column">
+                <label for="surname">Фамилия:</label>
+                {{ form.surname(class="input") }}
+            </div>
+            <div class="form-column">
+                <label for="first_name">Имя:</label>
+                {{ form.first_name(class="input") }}
+            </div>
         </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
-
+        <div class="form-row">
+            <div class="form-column">
+                <label for="patronymic">Отчество:</label>
+                {{ form.patronymic(class="input") }}
+            </div>
+            <div class="form-column">
+                <label for="email">Email:</label>
+                {{ form.email(class="input") }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-column">
+                <label for="password">Пароль:</label>
+                {{ form.password(class="input") }}
+            </div>
+            <div class="form-column">
+                <label for="confirm_password">Подтвердите пароль:</label>
+                {{ form.confirm_password(class="input") }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-column">
+                <label for="birth_date">Дата рождения:</label>
+                {{ form.birth_date(class="input") }}
+            </div>
+            <div class="form-column">
+                <label for="phone">Телефон:</label>
+                {{ form.phone(class="input") }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-column">
+                <label for="address">Адрес:</label>
+                {{ form.address(class="input") }}
+            </div>
+            <div class="form-column">
+                <label for="education">Образование:</label>
+                {{ form.education(class="input") }}
+            </div>
+        </div>
+        <button type="submit" class="btn">Зарегистрировать преподавателя</button>
+    </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashed-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+</div>
 {% endblock %}

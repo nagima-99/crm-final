@@ -18,13 +18,14 @@
     <div class="container">
         <aside>
             <ul>
-                <li><a href="{{ url_for('administrator_dashboard', id=administrator.id) }}">Профиль</a></li>
-                <li><a href="{{ url_for('register_student') }}">Регистрация ученика</a></li>
-                <li><a href="{{ url_for('register_teacher') }}">Регистрация преподавателя</a></li>
-                <li><a href="{{ url_for('list_courses') }}">Курсы</a></li>
-                <li><a href="{{ url_for('list_groups') }}">Группы</a></li>
+              <li><a href="{{ url_for('administrator_dashboard', id=administrator.id) }}" class="nav-link {% if request.endpoint == 'administrator_dashboard' %}active{% endif %}">Профиль</a></li>
+              <li><a href="{{ url_for('register_student') }}" class="nav-link {% if request.endpoint == 'register_student' %}active{% endif %}">Регистрация ученика</a></li>
+              <li><a href="{{ url_for('register_teacher') }}" class="nav-link {% if request.endpoint == 'register_teacher' %}active{% endif %}">Регистрация преподавателя</a></li>
+              <li><a href="{{ url_for('list_courses') }}" class="nav-link {% if request.endpoint == 'list_courses' %}active{% endif %}">Курсы</a></li>
+              <li><a href="{{ url_for('list_groups') }}" class="nav-link {% if request.endpoint == 'list_groups' %}active{% endif %}">Группы</a></li>
             </ul>
-        </aside>
+          </aside>
+          
 
         <main>
             {% block content %}
@@ -35,5 +36,7 @@
     <footer>
         <p>&copy; CRM 2024</p>
     </footer>
+
+
 </body>
 </html>

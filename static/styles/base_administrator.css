@@ -5,6 +5,12 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%; /* Обеспечиваем, чтобы body занимал всю высоту экрана */
+  display: flex;
+  flex-direction: column;
+}
+
 /* Global Styles */
 body {
   font-family: Arial, sans-serif;
@@ -32,6 +38,7 @@ footer {
   padding: 10px;
   background-color: #333;
   color: white;
+  margin-top: auto;
 }
 
 /* Layout: Container */
@@ -50,6 +57,16 @@ aside {
   padding: 15px;
 }
 
+/* Стили для боковой панели */
+aside {
+  width: 250px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+}
+
+/* Стили для списка в боковой панели */
 aside ul {
   list-style-type: none;
 }
@@ -58,15 +75,34 @@ aside li {
   margin: 15px 0;
 }
 
+/* Стили для ссылок в боковой панели */
 aside a {
   text-decoration: none;
   color: #0044cc;
   font-weight: bold;
+  padding: 10px;
+  display: block;
+  transition: all 0.3s ease;
 }
 
+/* Эффект при наведении */
 aside a:hover {
-  color: #0077ff;
+  color: white;
+  background-color: #0044cc;
+  text-decoration: none;
 }
+
+/* Стили для активной ссылки */
+aside a.active {
+  background-color: #0044cc;
+  color: white;
+}
+
+/* Убираем стиль обводки у ссылок, когда они не активны */
+aside a:focus {
+  outline: none;
+}
+
 
 /* Main Content */
 main {

@@ -1,16 +1,6 @@
-/* Общие стили */
-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
-}
-
-/* Контейнер формы */
-form {
-    max-width: 600px;
+/* Стили для формы регистрации преподавателя */
+.register-teacher-form {
+    width: 100%;
     margin: 20px auto;
     padding: 20px;
     background: #ffffff;
@@ -18,22 +8,34 @@ form {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Стили заголовков */
-h2, h3 {
+.register-teacher-form h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #444;
 }
 
-/* Стили для меток (label) */
-label {
+.register-teacher-form label {
     display: block;
     margin: 10px 0 5px;
     font-weight: bold;
 }
 
+/* Контейнеры для строк и столбцов */
+.register-teacher-form .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Отступ между колонками */
+    margin-bottom: 20px;
+}
+
+.register-teacher-form .form-column {
+    flex: 1;
+    min-width: calc(50% - 10px); /* Два столбца с отступом */
+    max-width: 48%;
+}
+
 /* Стили для полей ввода */
-.input {
+.register-teacher-form .input {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
@@ -44,10 +46,8 @@ label {
 }
 
 /* Стили кнопки */
-.btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
+.register-teacher-form .btn {
+    padding: 10px 20px;
     background-color: #007bff;
     color: white;
     border: none;
@@ -56,16 +56,43 @@ label {
     font-size: 16px;
     text-align: center;
     transition: background-color 0.3s ease;
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.btn:hover {
+.register-teacher-form .btn:hover {
     background-color: #0056b3;
 }
 
-/* Стили для заголовка секции "Данные клиента" */
-h3 {
-    margin-top: 30px;
-    border-top: 1px solid #ccc;
-    padding-top: 15px;
+/* Стили для флэш-сообщений */
+.register-teacher-form .flashed-messages {
+    margin-top: 20px;
 }
 
+.register-teacher-form .alert {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.register-teacher-form .alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.register-teacher-form .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+/* Стиль на мобильных устройствах для одного столбца */
+@media (max-width: 768px) {
+    .register-teacher-form .form-column {
+        min-width: 100%;
+    }
+}
