@@ -1,5 +1,5 @@
-/* Общие стили для всех форм */
-.course-form {
+/* Общие стили для всех форм групп */
+.group-form {
     width: 100%;
     margin: 20px auto;
     padding: 20px;
@@ -8,19 +8,19 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.course-form h2 {
+.group-form h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #444;
 }
 
-.course-form label {
+.group-form label {
     display: block;
     margin: 10px 0 5px;
     font-weight: bold;
 }
 
-.add-course-link {
+.add-group-link {
     display: block;
     margin-bottom: 20px;
     text-align: right;
@@ -28,20 +28,21 @@
     color: #007bff;
     font-weight: bold;
 }
-.course-form .form-row {
+
+.group-form .form-row {
     display: flex;
     flex-wrap: wrap;
     gap: 20px; /* Отступ между колонками */
     margin-bottom: 20px;
 }
 
-.course-form .form-column {
+.group-form .form-column {
     flex: 1;
     min-width: calc(50% - 10px); /* Два столбца с отступом */
     max-width: 48%;
 }
 
-.course-form .input {
+.group-form .input {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
@@ -51,8 +52,8 @@
     box-sizing: border-box;
 }
 
-/* Кнопки */
-.course-form button, .course-form .btn {
+/* Кнопки для групп */
+.group-form button, .group-form .btn {
     padding: 10px 20px;
     background-color: #007bff;
     color: white;
@@ -68,74 +69,73 @@
     margin-right: auto;
 }
 
-.course-form button:hover, .course-form .btn:hover {
+.group-form button:hover, .group-form .btn:hover {
     background-color: #0056b3;
 }
 
-/* Стили для таблицы курсов */
-.course-list-table {
+/* Стили для таблицы групп */
+.group-list-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.course-list-table th, .course-list-table td {
+.group-list-table th, .group-list-table td {
     border: 1px solid #ddd;
     padding: 8px;
 }
 
-.course-list-table th {
+.group-list-table th {
     background-color: #f2f2f2;
     text-align: left;
     font-weight: bold;
 }
 
-.course-list-table td {
+.group-list-table td {
     text-align: left;
 }
 
-/* Ссылки в таблице */
-.course-list-table .edit-link, .course-list-table .delete-link {
+/* Ссылки в таблице для групп */
+.group-list-table .edit-link, .group-list-table .delete-link {
     text-decoration: none;
 }
 
-.course-list-table .edit-link {
+.group-list-table .edit-link {
     color: #007bff;
 }
 
-.course-list-table .delete-link {
+.group-list-table .delete-link {
     color: #d9534f;
 }
 
-.course-list-table .edit-link:hover, .course-list-table .delete-link:hover {
+.group-list-table .edit-link:hover, .group-list-table .delete-link:hover {
     text-decoration: underline;
 }
 
-.course-list-table .edit-link i, .course-list-table .delete-link i {
+.group-list-table .edit-link i, .group-list-table .delete-link i {
     font-size: 20px;
     color: #007bff; /* Синий цвет для редактирования */
     margin-right: 10px; /* Отступ между иконками */
 }
 
-.course-list-table .delete-link i {
+.group-list-table .delete-link i {
     color: #d9534f; /* Красный цвет для удаления */
 }
 
-.course-list-table .edit-link:hover i {
+.group-list-table .edit-link:hover i {
     color: #0056b3; /* Более темный синий при наведении */
 }
 
-.course-list-table .delete-link:hover i {
+.group-list-table .delete-link:hover i {
     color: #c9302c; /* Более темный красный при наведении */
 }
 
-
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
-    .course-list-table {
+    .group-list-table {
         font-size: 14px;
     }
 
-    .course-list .add-course-link {
+    .group-form .add-group-link {
         text-align: center;
     }
 }

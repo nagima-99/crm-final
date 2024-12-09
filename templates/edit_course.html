@@ -3,20 +3,22 @@
 {% block title %}Редактировать курс{% endblock %}
 
 {% block content %}
-<form method="POST" action="{{ url_for('edit_course', id=course.id) }}">
-    {{ form.hidden_tag() }}
-    <div>
-        <label for="course_name">Название курса:</label>
-        {{ form.course_name() }}
-    </div>
-    <div>
-        <label for="academic_hours">Академические часы</label>
-        {{ form.academic_hours() }}
-    </div>
-    <div>
-        <label for="price">Абонемент</label>
-        {{ form.price() }}
-    </div>
-    <button type="submit">Сохранить изменения</button>
-</form>
+<div class="course-form">
+    <form method="POST" action="{{ url_for('edit_course', id=course.id) }}">
+        {{ form.hidden_tag() }}
+        <div>
+            <label for="course_name">Название курса:</label>
+            {{ form.course_name(class="input") }}
+        </div>
+        <div>
+            <label for="academic_hours">Академические часы:</label>
+            {{ form.academic_hours(class="input") }}
+        </div>
+        <div>
+            <label for="price">Абонемент:</label>
+            {{ form.price(class="input") }}
+        </div>
+        <button type="submit" class="btn">Сохранить изменения</button>
+    </form>
+</div>
 {% endblock %}

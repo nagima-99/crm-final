@@ -3,22 +3,21 @@
 {% block title %}Редактировать группу{% endblock %}
 
 {% block content %}
-<form method="POST" action="{{ url_for('add_course') }}">
-    {{ form.hidden_tag() }}
-    <div>
-        <label for="course_name">Course Name</label>
-        {{ form.course_name }}
-    </div>
-    <div>
-        <label for="academic_hours">Academic Hours</label>
-        {{ form.academic_hours }}
-    </div>
-    <div>
-        <label for="price">Price</label>
-        {{ form.price }}
-    </div>
-    <div>
-        <button type="submit">{{ form.submit }}</button>
-    </div>
-</form>
+<div class="course-form">
+    <form method="POST" action="{{ url_for('add_course') }}">
+        {{ form.hidden_tag() }}
+        <div>
+            <label for="course_name">Название курса:</label>
+            {{ form.course_name(class="input") }}
+        </div>
+        <div>
+            <label for="academic_hours">Академические часы:</label>
+            {{ form.academic_hours(class="input") }}
+        </div>
+        <div>
+            <label for="price">Абонемент:</label>
+            {{ form.price(class="input") }}
+        </div>
+        <button type="submit" class="btn">Добавить новый курс</button>
+    </form>
 {% endblock %}

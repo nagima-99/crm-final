@@ -3,17 +3,17 @@
 {% block title %}Редактировать группу{% endblock %}
 
 {% block content %}
-<h2>Редактировать группу</h2>
-
-<form method="POST" action="{{ url_for('edit_group', id=group.id) }}">
-    {{ form.hidden_tag() }}
-    
-    <div>
-        <label for="group_name">Название группы:</label>
-        {{ form.group_name() }}
-    </div>
-    <div>
-        <button type="submit">Сохранить изменения</button>
-    </div>
-</form>
+<div class="group-form ">
+    <form method="POST" action="{{ url_for('edit_group', id=group.id) }}">
+        {{ form.hidden_tag() }}
+        
+        <div>
+            <label for="group_name">Название группы:</label>
+            {{ form.group_name(class="input") }}
+        </div>
+        <div>
+            <button type="submit">Сохранить изменения</button>
+        </div>
+    </form>
+</div>
 {% endblock %}

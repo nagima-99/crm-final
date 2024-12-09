@@ -10,7 +10,6 @@ class AdministratorForm(FlaskForm):
     address = StringField('Адрес', validators=[Optional()])
     office_name = StringField('Название офиса', validators=[Optional()])
     office_address = StringField('Адрес офиса', validators=[Optional()])
-    submit = SubmitField('Сохранить')
 
 class RegisterStudentForm(FlaskForm):
     surname = StringField('Фамилия', validators=[DataRequired()])
@@ -33,7 +32,6 @@ class RegisterStudentForm(FlaskForm):
     ])
     client_workplace = StringField('Место работы клиента')
     client_position = StringField('Должность клиента')
-    submit = SubmitField('Зарегистрировать')
 
 class RegisterTeacherForm(FlaskForm):
     surname = StringField('Фамилия', validators=[DataRequired()])
@@ -49,15 +47,12 @@ class RegisterTeacherForm(FlaskForm):
     ])
     address = StringField('Адрес', validators=[DataRequired()])
     education = StringField('Образование', validators=[DataRequired()])
-    submit = SubmitField('Зарегистрировать')
 
 
 class CourseForm(FlaskForm):
-    course_name = StringField('Course Name', validators=[DataRequired()])
-    academic_hours = IntegerField('Academic Hours', validators=[DataRequired()])
-    price = IntegerField('Price', validators=[DataRequired()])
-    submit = SubmitField('Submit')
+    course_name = StringField('Название курса', validators=[DataRequired()])
+    academic_hours = IntegerField('Академические часы:', validators=[DataRequired()])
+    price = IntegerField('Абонемент', validators=[DataRequired()])
 
 class GroupForm(FlaskForm):
     group_name = StringField('Название группы', validators=[DataRequired()])
-    submit = SubmitField('Submit')
