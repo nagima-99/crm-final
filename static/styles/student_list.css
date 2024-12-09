@@ -1,0 +1,74 @@
+/* Общие стили для списка студентов */
+.student-list-container {
+    width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовок списка */
+.student-list-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #444;
+}
+
+/* Стили для кнопки добавления студента */
+.add-student-btn-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.add-student-btn-container a {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.add-student-btn-container a:hover {
+    background-color: #0056b3;
+}
+
+/* Стили для таблицы студентов */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.table td {
+    color: #333;
+}
+
+.btn-danger {
+    font-size: 20px;
+    color: #d9534f;
+    text-decoration: none;
+    display: inline-block;
+    padding: 5px 10px;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    color: white;
+    background-color: #d9534f; 
+    border-radius: 4px;
+}

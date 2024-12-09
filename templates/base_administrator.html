@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/register_teacher.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/course.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/group.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/student_list.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/teachers_list.css') }}">
     <title>{% block title %}CRM{% endblock %}</title>
 </head>
 <body>
@@ -21,8 +23,8 @@
         <aside>
             <ul>
               <li><a href="{{ url_for('administrator_dashboard', id=administrator.id) }}" class="nav-link {% if request.endpoint == 'administrator_dashboard' %}active{% endif %}">Профиль</a></li>
-              <li><a href="{{ url_for('register_student') }}" class="nav-link {% if request.endpoint == 'register_student' %}active{% endif %}">Регистрация ученика</a></li>
-              <li><a href="{{ url_for('register_teacher') }}" class="nav-link {% if request.endpoint == 'register_teacher' %}active{% endif %}">Регистрация преподавателя</a></li>
+              <li><a href="{{ url_for('students_list') }}" class="nav-link {% if request.endpoint == 'students_list' %}active{% endif %}">Список учеников</a></li>
+              <li><a href="{{ url_for('teachers_list') }}" class="nav-link {% if request.endpoint == 'teachers_list' %}active{% endif %}">Список преподавателей</a></li>
               <li><a href="{{ url_for('list_courses') }}" class="nav-link {% if request.endpoint == 'list_courses' %}active{% endif %}">Курсы</a></li>
               <li><a href="{{ url_for('list_groups') }}" class="nav-link {% if request.endpoint == 'list_groups' %}active{% endif %}">Группы</a></li>
             </ul>

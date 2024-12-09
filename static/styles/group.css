@@ -94,48 +94,32 @@
     text-align: left;
 }
 
-/* Ссылки в таблице для групп */
-.group-list-table .edit-link, .group-list-table .delete-link {
-    text-decoration: none;
-}
-
-.group-list-table .edit-link {
-    color: #007bff;
-}
-
-.group-list-table .delete-link {
-    color: #d9534f;
-}
-
-.group-list-table .edit-link:hover, .group-list-table .delete-link:hover {
-    text-decoration: underline;
-}
-
-.group-list-table .edit-link i, .group-list-table .delete-link i {
+.btn-danger {
     font-size: 20px;
-    color: #007bff; /* Синий цвет для редактирования */
-    margin-right: 10px; /* Отступ между иконками */
+    color: #d9534f;
+    text-decoration: none;
+    display: inline-block;
+    padding: 5px 10px;
+    transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-.group-list-table .delete-link i {
-    color: #d9534f; /* Красный цвет для удаления */
+.btn-danger:hover {
+    color: white;
+    background-color: #d9534f; 
+    border-radius: 4px;
 }
 
-.group-list-table .edit-link:hover i {
-    color: #0056b3; /* Более темный синий при наведении */
+.btn-edit {
+    font-size: 20px;
+    color: #007bff;
+    text-decoration: none;
+    display: inline-block;
+    padding: 5px 10px;
+    transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-.group-list-table .delete-link:hover i {
-    color: #c9302c; /* Более темный красный при наведении */
-}
-
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-    .group-list-table {
-        font-size: 14px;
-    }
-
-    .group-form .add-group-link {
-        text-align: center;
-    }
+.btn-edit:hover {
+    color: white;
+    background-color: #0056b3;
+    border-radius: 4px;
 }

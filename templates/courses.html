@@ -23,8 +23,8 @@
                 <td>{{ course.academic_hours }}</td>
                 <td>{{ course.price }}</td>
                 <td>
-                    <a href="{{ url_for('edit_course', id=course.id) }}" class="edit-link"><i class="fa fa-edit"></i></a>
-                    <a href="{{ url_for('delete_course', id=course.id) }}" class="delete-link"><i class="fa fa-trash"></i></a>
+                    <a href="{{ url_for('edit_course', id=course.id) }}" class="btn-edit"><i class="fa fa-edit"></i></a>
+                    <a href="{{ url_for('delete_course', id=course.id) }}" class="btn-danger"><i class="fa fa-trash"></i></a>
                 </td>
             </tr>
             {% endfor %}

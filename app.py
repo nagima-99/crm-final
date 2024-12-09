@@ -94,6 +94,75 @@ def administrator_dashboard(id):
 
     return render_template('administrator_dashboard.html', administrator=administrator, age=age, form=form)
 
+# Cписок учеников
+@app.route('/students', methods=['GET'])
+@login_required
+@role_required('Администратор')
+def students_list():
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
+    students = Student.query.all()
+
+    student_ages = {student.id: calculate_age(student.birth_date) for student in students}
+
+    return render_template('students_list.html', students=students, administrator=administrator, student_ages=student_ages)
+
+
+@app.route('/delete_student/<int:id>', methods=['GET'])
+@login_required
+@role_required('Администратор')
+def delete_student(id):
+    # Ищем студента по ID
+    student = Student.query.get(id)
+    if not student:
+        flash("Студент не найден!")
+        return redirect(url_for('students_list'))
+
+    # Удаляем связанного пользователя
+    user = student.user  # Получаем связанного пользователя
+    if user:
+        db.session.delete(user)  # Удаляем пользователя из таблицы Users
+    
+    db.session.delete(student)  # Удаляем студента из таблицы Student
+    db.session.commit()  # Подтверждаем изменения в базе данных
+
+    flash("Студент и пользователь успешно удалены!")
+    return redirect(url_for('students_list'))
+
+
+# Cписок учителей
+@app.route('/teachers', methods=['GET'])
+@login_required
+@role_required('Администратор')
+def teachers_list():
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
+    teachers = Teacher.query.all()
+
+    teacher_ages = {teacher.id: calculate_age(teacher.birth_date) for teacher in teachers}
+
+    return render_template('teachers_list.html', teachers=teachers, administrator=administrator, teacher_ages=teacher_ages)
+
+
+@app.route('/delete_teacher/<int:id>', methods=['GET'])
+@login_required
+@role_required('Администратор')
+def delete_teacher(id):
+    teacher = Teacher.query.get(id)
+    if not teacher:
+        flash("Преподаватель не найден!")
+        return redirect(url_for('teachers_list'))
+
+    user = teacher.user  # Связанный пользователь
+    if user:
+        db.session.delete(user)
+
+    db.session.delete(teacher)
+    db.session.commit()
+
+    flash("Преподаватель и пользователь успешно удалены!")
+    return redirect(url_for('teachers_list'))
+
+
+
 # Регистрация ученика
 @app.route('/register_student', methods=['GET', 'POST'])
 @login_required
@@ -136,7 +205,7 @@ def register_student():
             db.session.commit()  # Сохраняем данные в таблицу Teacher
 
             print('Студент успешно зарегистрирован!', 'success')
-            return redirect(url_for('administrator_dashboard', id=current_user.id))
+            return redirect(url_for('students_list', id=current_user.id))
         
         except Exception as e:
             db.session.rollback()  # Откатываем изменения при ошибке

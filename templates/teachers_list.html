@@ -1,0 +1,39 @@
+{% extends "base_administrator.html" %}
+
+{% block content %}
+<div class="teacher-list-container">
+    <h1>Список учителей</h1>
+    <div class="add-teacher-btn-container">
+        <a href="{{ url_for('register_teacher') }}">Добавить учителя</a>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Возраст</th>
+                <th>Образование</th>
+                <th>Телефон</th>
+                <th>Электронная почта</th>
+                <th>Адрес</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for teacher in teachers %}
+            <tr>
+                <td>{{ teacher.surname }} {{ teacher.first_name }} {{ teacher.patronymic }}</td>
+                <td>{{ teacher_ages[teacher.id] }}</td> 
+                <td>{{ teacher.education }}</td>
+                <td>{{ teacher.phone }}</td>
+                <td>{{ teacher.user.email }}</td>
+                <td>{{ teacher.address }}</td>
+                <td>
+                    <a class="delete-link" href="{{ url_for('delete_teacher', id=teacher.id) }}"><i class="fa fa-trash"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
