@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, DateField, SubmitField, IntegerField
+from wtforms import StringField, PasswordField, DateField, IntegerField, SelectField
 from wtforms.validators import Optional, DataRequired, Email, EqualTo, Regexp
 
 class AdministratorForm(FlaskForm):
@@ -56,3 +56,8 @@ class CourseForm(FlaskForm):
 
 class GroupForm(FlaskForm):
     group_name = StringField('Название группы', validators=[DataRequired()])
+
+class ManageStudentForm(FlaskForm):
+    course_id = SelectField('Курс', coerce=int, validators=[DataRequired()])
+    group_id = SelectField('Группа', coerce=int, validators=[DataRequired()])
+    teacher_id = SelectField('Преподаватель', coerce=int, validators=[DataRequired()])

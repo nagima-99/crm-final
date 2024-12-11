@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 from datetime import datetime
-from forms import AdministratorForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm
-from models import db, Users, Administrator, Teacher, Student, Course, Group
+from forms import AdministratorForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm, ManageStudentForm
+from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, ManageTeacher
 from functools import wraps
 
 # Инициализация приложения
@@ -251,7 +251,7 @@ def register_teacher():
             db.session.commit()  # Сохраняем данные в таблицу Teacher
 
             flash('Преподаватель успешно зарегистрирован!', 'success')
-            return redirect(url_for('administrator_dashboard', id=current_user.id))
+            return redirect(url_for('teachers_list', id=current_user.id))
         
         except Exception as e:
             db.session.rollback()  # Откатываем изменения при ошибке
@@ -360,6 +360,63 @@ def delete_group(id):
     db.session.delete(group)
     db.session.commit()
     return redirect(url_for('list_groups'))
+
+@app.route('/management', methods=['GET', 'POST'])
+@login_required
+@role_required('Администратор')
+def management():
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
+    students = Student.query.all()  # Получаем всех студентов
+    teachers = Teacher.query.all()  # Получаем всех преподавателей
+    courses = Course.query.all()  # Получаем все курсы
+    groups = Group.query.all()  # Получаем все группы
+
+    form = ManageStudentForm()
+
+    # Заполняем поля формы данными из базы
+    form.course_id.choices = [(course.id, course.course_name) for course in courses]
+    form.group_id.choices = [(group.id, group.group_name) for group in groups]
+    form.teacher_id.choices = [(teacher.teacher_id, teacher.surname) for teacher in teachers]
+
+    # Если форма была отправлена
+    if request.method == 'POST' and form.validate_on_submit():
+        student_id = request.form.get('student_id')
+        course_id = form.course_id.data
+        group_id = form.group_id.data
+        teacher_id = form.teacher_id.data
+
+        # Добавляем новую запись в таблицу ManageStudent
+        if student_id and course_id and group_id:
+            manage_student = ManageStudent(
+                student_id=student_id,
+                course_id=course_id,
+                group_id=group_id
+            )
+            db.session.add(manage_student)
+
+        # Добавляем новую запись в таблицу ManageTeacher
+        if teacher_id and course_id and group_id:
+            manage_teacher = ManageTeacher(
+                teacher_id=teacher_id,
+                course_id=course_id,
+                group_id=group_id
+            )
+            db.session.add(manage_teacher)
+
+        db.session.commit()
+        flash('Назначения успешно сохранены!')
+        return redirect(url_for('management')) 
+
+    return render_template(
+        'management.html',
+        administrator=administrator,
+        students=students,
+        teachers=teachers,
+        courses=courses,
+        groups=groups,
+        form=form 
+    )
+
 
 # Просмотр всех групп
 @app.route('/groups', methods=['GET'])

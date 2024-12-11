@@ -1,0 +1,33 @@
+{% extends "base_administrator.html" %}
+
+{% block content %}
+  <h1>Управление студентами</h1>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Студент</th>
+          <th>Курс</th>
+          <th>Группа</th>
+          <th>Преподаватель</th>
+          <th>Действие</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+          <tr>
+            <td>{{ student.first_name}}</td>
+            <td>{{ form.course_id() }}</td> 
+            <td>{{ form.group_id() }}</td>   
+            <td>{{ form.teacher_id() }}</td>
+            <td>
+              <input type="hidden" name="student_id" value="{{ student.student_id }}">
+              <button type="submit" class="btn btn-primary">Назначить</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
+{% endblock %}

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/group.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/student_list.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/teachers_list.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/management.css') }}">
     <title>{% block title %}CRM{% endblock %}</title>
 </head>
 <body>
@@ -27,6 +28,7 @@
               <li><a href="{{ url_for('teachers_list') }}" class="nav-link {% if request.endpoint == 'teachers_list' %}active{% endif %}">Список преподавателей</a></li>
               <li><a href="{{ url_for('list_courses') }}" class="nav-link {% if request.endpoint == 'list_courses' %}active{% endif %}">Курсы</a></li>
               <li><a href="{{ url_for('list_groups') }}" class="nav-link {% if request.endpoint == 'list_groups' %}active{% endif %}">Группы</a></li>
+              <li><a href="{{ url_for('management') }}" class="nav-link {% if request.endpoint == 'management' %}active{% endif %}">Управления</a></li>
             </ul>
           </aside>
           
