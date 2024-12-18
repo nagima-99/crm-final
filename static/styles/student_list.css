@@ -57,18 +57,3 @@
 .table td {
     color: #333;
 }
-
-.btn-danger {
-    font-size: 20px;
-    color: #d9534f;
-    text-decoration: none;
-    display: inline-block;
-    padding: 5px 10px;
-    transition: color 0.3s ease, background-color 0.3s ease;
-}
-
-.btn-danger:hover {
-    color: white;
-    background-color: #d9534f; 
-    border-radius: 4px;
-}

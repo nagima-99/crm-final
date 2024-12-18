@@ -1,0 +1,70 @@
+/* Стили для формы редактирования */
+.form-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовок формы */
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #444;
+}
+
+/* Стили для меток (label) */
+.form-container label {
+    display: block;
+    margin: 15px 0 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Стили для выпадающих списков (select) */
+.form-container select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+}
+
+/* Стили для кнопки */
+.form-container button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    display: block;
+    width: 100%;
+}
+
+.form-container button:hover {
+    background-color: #0056b3;
+}
+
+/* Стили для ссылки "Назад" */
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}

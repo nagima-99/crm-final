@@ -1,4 +1,4 @@
-/* Общие стили для всех форм */
+/* Общий контейнер для таблицы курсов */
 .course-form {
     width: 100%;
     margin: 20px auto;
@@ -8,18 +8,14 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Заголовок формы */
 .course-form h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #444;
 }
 
-.course-form label {
-    display: block;
-    margin: 10px 0 5px;
-    font-weight: bold;
-}
-
+/* Ссылка для добавления нового курса */
 .add-course-link {
     display: block;
     margin-bottom: 20px;
@@ -28,67 +24,32 @@
     color: #007bff;
     font-weight: bold;
 }
-.course-form .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px; /* Отступ между колонками */
-    margin-bottom: 20px;
-}
-
-.course-form .form-column {
-    flex: 1;
-    min-width: calc(50% - 10px); /* Два столбца с отступом */
-    max-width: 48%;
-}
-
-.course-form .input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-    box-sizing: border-box;
-}
-
-/* Кнопки */
-.course-form button, .course-form .btn {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-    transition: background-color 0.3s ease;
-    width: auto;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.course-form button:hover, .course-form .btn:hover {
-    background-color: #0056b3;
-}
 
 /* Стили для таблицы курсов */
 .course-list-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 20px;
 }
 
 .course-list-table th, .course-list-table td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px;
+    text-align: left;
 }
 
+/* Заголовки таблицы */
 .course-list-table th {
     background-color: #f2f2f2;
-    text-align: left;
     font-weight: bold;
+    color: #333;
 }
 
-.course-list-table td {
-    text-align: left;
+/* Строки таблицы */
+.course-list-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.course-list-table tr:hover {
+    background-color: #f1f1f1;
 }

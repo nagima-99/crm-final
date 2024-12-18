@@ -8,18 +8,14 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Заголовок формы */
 .group-form h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #444;
 }
 
-.group-form label {
-    display: block;
-    margin: 10px 0 5px;
-    font-weight: bold;
-}
-
+/* Ссылка для добавления новой группы */
 .add-group-link {
     display: block;
     margin-bottom: 20px;
@@ -29,97 +25,32 @@
     font-weight: bold;
 }
 
-.group-form .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px; /* Отступ между колонками */
-    margin-bottom: 20px;
-}
-
-.group-form .form-column {
-    flex: 1;
-    min-width: calc(50% - 10px); /* Два столбца с отступом */
-    max-width: 48%;
-}
-
-.group-form .input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-    box-sizing: border-box;
-}
-
-/* Кнопки для групп */
-.group-form button, .group-form .btn {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-    transition: background-color 0.3s ease;
-    width: auto;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.group-form button:hover, .group-form .btn:hover {
-    background-color: #0056b3;
-}
-
 /* Стили для таблицы групп */
 .group-list-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 20px;
 }
 
 .group-list-table th, .group-list-table td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px;
+    text-align: left;
 }
 
+/* Заголовки таблицы */
 .group-list-table th {
     background-color: #f2f2f2;
-    text-align: left;
     font-weight: bold;
+    color: #333;
 }
 
-.group-list-table td {
-    text-align: left;
+/* Строки таблицы */
+.group-list-table tr:nth-child(even) {
+    background-color: #f9f9f9;
 }
 
-.btn-danger {
-    font-size: 20px;
-    color: #d9534f;
-    text-decoration: none;
-    display: inline-block;
-    padding: 5px 10px;
-    transition: color 0.3s ease, background-color 0.3s ease;
+.group-list-table tr:hover {
+    background-color: #f1f1f1;
 }
 
-.btn-danger:hover {
-    color: white;
-    background-color: #d9534f; 
-    border-radius: 4px;
-}
-
-.btn-edit {
-    font-size: 20px;
-    color: #007bff;
-    text-decoration: none;
-    display: inline-block;
-    padding: 5px 10px;
-    transition: color 0.3s ease, background-color 0.3s ease;
-}
-
-.btn-edit:hover {
-    color: white;
-    background-color: #0056b3;
-    border-radius: 4px;
-}

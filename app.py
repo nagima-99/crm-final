@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from datetime import datetime
-from forms import AdministratorForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm, ManageStudentForm
+from forms import AdministratorForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm
 from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, ManageTeacher
 from functools import wraps
 
@@ -361,63 +361,6 @@ def delete_group(id):
     db.session.commit()
     return redirect(url_for('list_groups'))
 
-@app.route('/management', methods=['GET', 'POST'])
-@login_required
-@role_required('Администратор')
-def management():
-    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
-    students = Student.query.all()  # Получаем всех студентов
-    teachers = Teacher.query.all()  # Получаем всех преподавателей
-    courses = Course.query.all()  # Получаем все курсы
-    groups = Group.query.all()  # Получаем все группы
-
-    form = ManageStudentForm()
-
-    # Заполняем поля формы данными из базы
-    form.course_id.choices = [(course.id, course.course_name) for course in courses]
-    form.group_id.choices = [(group.id, group.group_name) for group in groups]
-    form.teacher_id.choices = [(teacher.teacher_id, teacher.surname) for teacher in teachers]
-
-    # Если форма была отправлена
-    if request.method == 'POST' and form.validate_on_submit():
-        student_id = request.form.get('student_id')
-        course_id = form.course_id.data
-        group_id = form.group_id.data
-        teacher_id = form.teacher_id.data
-
-        # Добавляем новую запись в таблицу ManageStudent
-        if student_id and course_id and group_id:
-            manage_student = ManageStudent(
-                student_id=student_id,
-                course_id=course_id,
-                group_id=group_id
-            )
-            db.session.add(manage_student)
-
-        # Добавляем новую запись в таблицу ManageTeacher
-        if teacher_id and course_id and group_id:
-            manage_teacher = ManageTeacher(
-                teacher_id=teacher_id,
-                course_id=course_id,
-                group_id=group_id
-            )
-            db.session.add(manage_teacher)
-
-        db.session.commit()
-        flash('Назначения успешно сохранены!')
-        return redirect(url_for('management')) 
-
-    return render_template(
-        'management.html',
-        administrator=administrator,
-        students=students,
-        teachers=teachers,
-        courses=courses,
-        groups=groups,
-        form=form 
-    )
-
-
 # Просмотр всех групп
 @app.route('/groups', methods=['GET'])
 @login_required
@@ -426,6 +369,121 @@ def list_groups():
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     groups = Group.query.all()
     return render_template('groups.html', groups=groups, administrator=administrator)
+
+@app.route('/management', methods=['GET'])
+@login_required
+@role_required('Администратор')
+def management():
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
+    students = Student.query.all()
+    courses = Course.query.all()
+    groups = Group.query.all()
+    teachers = Teacher.query.all()
+
+    student_info = []
+
+    for student in students:
+        manage_student_entry = ManageStudent.query.filter_by(student_id=student.student_id).first()
+        course = None
+        group = None
+        teacher = None
+
+        if manage_student_entry:
+            # Получаем курс и группу
+            course = Course.query.get(manage_student_entry.course_id)
+            group = Group.query.get(manage_student_entry.group_id)
+
+            # Получаем преподавателя
+            manage_teacher = ManageTeacher.query.filter_by(
+                group_id=manage_student_entry.group_id,
+                course_id=manage_student_entry.course_id
+            ).first()
+
+            if manage_teacher:
+                teacher = Teacher.query.get(manage_teacher.teacher_id)
+
+        student_info.append({
+            'student': student,
+            'course': course,
+            'group': group,
+            'teacher': teacher
+        })
+
+    return render_template(
+        'management.html',
+        administrator=administrator,
+        student_info=student_info,
+        courses=courses,
+        groups=groups,
+        teachers=teachers
+    )
+
+@app.route('/edit_management/<int:id>', methods=['GET', 'POST'])
+@login_required
+@role_required('Администратор')
+def edit_management(id):
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
+    student = Student.query.filter_by(student_id=id).first_or_404()
+    courses = Course.query.all()
+    groups = Group.query.all()
+    teachers = Teacher.query.all()
+
+    manage_student = ManageStudent.query.filter_by(student_id=student.student_id).first()
+    current_course_id = manage_student.course_id if manage_student else None
+    current_group_id = manage_student.group_id if manage_student else None
+
+    # Находим преподавателя
+    manage_teacher = None
+    current_teacher_id = None
+    if manage_student:
+        manage_teacher = ManageTeacher.query.filter_by(
+            group_id=manage_student.group_id,
+            course_id=manage_student.course_id
+        ).first()
+        current_teacher_id = manage_teacher.teacher_id if manage_teacher else None
+
+    if request.method == 'POST':
+        course_id = int(request.form.get('course_id'))
+        group_id = int(request.form.get('group_id'))
+        teacher_id = int(request.form.get('teacher_id'))  # Получаем teacher_id из формы
+
+        # Создаем или обновляем запись о студенте
+        if not manage_student:
+            manage_student = ManageStudent(student_id=student.student_id)
+        manage_student.course_id = course_id
+        manage_student.group_id = group_id
+        db.session.add(manage_student)
+
+        # Создаем или обновляем запись о преподавателе
+        if not manage_teacher:
+            manage_teacher = ManageTeacher(
+                teacher_id=teacher_id,  # Используем teacher_id
+                group_id=group_id,
+                course_id=course_id
+            )
+        else:
+            manage_teacher.course_id = course_id
+            manage_teacher.group_id = group_id
+            manage_teacher.teacher_id = teacher_id  # Обновляем teacher_id
+
+        db.session.add(manage_teacher)
+
+        db.session.commit()
+        flash('Изменения сохранены!')
+        return redirect(url_for('management'))
+
+    return render_template(
+        'edit_management.html',
+        administrator=administrator,
+        student=student,
+        courses=courses,
+        groups=groups,
+        teachers=teachers,
+        current_course_id=current_course_id,
+        current_group_id=current_group_id,
+        current_teacher_id=current_teacher_id  # Передаем ID текущего преподавателя
+    )
+
 
 
 # Страница выхода

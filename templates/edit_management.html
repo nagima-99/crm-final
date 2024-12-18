@@ -1,0 +1,48 @@
+{% extends "base_administrator.html" %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST">
+        <!-- Курс -->
+        <label for="course_id">Курс:</label>
+        <select name="course_id" id="course_id" required>
+            <option value="" disabled selected>Выберите курс</option>
+            {% for course in courses %}
+            <option value="{{ course.id }}" 
+                    {% if course.id == current_course_id %}selected{% endif %}>
+                {{ course.course_name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Группа -->
+        <label for="group_id">Группа:</label>
+        <select name="group_id" id="group_id" required>
+            <option value="" disabled selected>Выберите группу</option>
+            {% for group in groups %}
+            <option value="{{ group.id }}" 
+                    {% if group.id == current_group_id %}selected{% endif %}>
+                {{ group.group_name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Преподаватель -->
+        <label for="teacher_id">Преподаватель:</label>
+        <select name="teacher_id" id="teacher_id" required>
+            <option value="" disabled selected>Выберите преподавателя</option>
+            {% for teacher in teachers %}
+            <option value="{{ teacher.id }}" 
+                    {% if teacher.id == current_teacher_id %}selected{% endif %}>
+                {{ teacher.first_name }} {{ teacher.surname }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Сохранить изменения</button>
+    </form>
+
+    <a href="{{ url_for('management') }}" class="back-link">Назад</a>
+</div>
+
+{% endblock %}

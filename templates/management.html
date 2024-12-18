@@ -1,33 +1,39 @@
 {% extends "base_administrator.html" %}
 
 {% block content %}
-  <h1>Управление студентами</h1>
-  <form method="POST">
-    {{ form.hidden_tag() }}
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Студент</th>
-          <th>Курс</th>
-          <th>Группа</th>
-          <th>Преподаватель</th>
-          <th>Действие</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for student in students %}
-          <tr>
-            <td>{{ student.first_name}}</td>
-            <td>{{ form.course_id() }}</td> 
-            <td>{{ form.group_id() }}</td>   
-            <td>{{ form.teacher_id() }}</td>
-            <td>
-              <input type="hidden" name="student_id" value="{{ student.student_id }}">
-              <button type="submit" class="btn btn-primary">Назначить</button>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </form>
+<h1>Управление студентами</h1>
+
+<table class="student-table">
+  <thead>
+    <tr>
+      <th>Фамилия</th>
+      <th>Имя</th>
+      <th>Курс</th>
+      <th>Группа</th>
+      <th>Преподаватель</th>
+      <th>Действия</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in student_info %}
+    <tr>
+      <td>{{ entry.student.surname }}</td>
+      <td>{{ entry.student.first_name }}</td>
+      <td>{{ entry.course.course_name if entry.course else "Не назначен" }}</td>
+      <td>{{ entry.group.group_name if entry.group else "Не назначена" }}</td>
+      <td>
+        {% if entry.teacher %}
+          {{ entry.teacher.first_name }} {{ entry.teacher.surname }}
+        {% else %}
+          Не назначен
+        {% endif %}
+      </td>
+      <td class="actions">
+        <a href="{{ url_for('edit_management', id=entry.student.student_id) }}">Редактировать</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
 {% endblock %}

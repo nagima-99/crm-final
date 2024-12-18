@@ -57,14 +57,3 @@
 .teacher-table td {
     color: #333;
 }
-
-/* Стили для кнопок в таблице */
-.delete-link {
-    font-size: 20px;
-    color: #d9534f;
-    margin-right: 10px;
-}
-
-.delete-link:hover {
-    background-color: #b52d2a;
-}

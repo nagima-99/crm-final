@@ -1,18 +1,66 @@
-.table {
+
+
+/* Стили для таблицы управления студентами */
+.student-table {
     width: 100%;
-    margin: 20px 0;
     border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.table, .table th, .table td {
-    border: 1px solid #ddd;
-}
-.table th, .table td {
-    padding: 8px;
+
+/* Стили для заголовков таблицы */
+.student-table th {
+    padding: 12px;
+    background-color: #aeb0b3;
+    color: #333;
     text-align: left;
 }
-.table th {
-    background-color: #f2f2f2;
+
+/* Стили для строк таблицы */
+.student-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
 }
-.form-control {
-    width: 100%;
+
+/* Строки таблицы */
+.student-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* При наведении на строку */
+.student-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Стили для ссылок в таблице */
+.student-table a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* При наведении на ссылку */
+.student-table a:hover {
+    text-decoration: underline;
+}
+
+/* Стили для кнопки "Назад" */
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Для таблицы с действиями */
+.student-table .actions {
+    text-align: center;
 }
