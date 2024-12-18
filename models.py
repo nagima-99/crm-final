@@ -108,3 +108,11 @@ class Schedule(db.Model):
     group = db.relationship('Group', backref='schedules')
     teacher = db.relationship('Teacher', backref='schedules')
 
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120), nullable=False)
+    start = db.Column(db.String(20), nullable=False)
+    end = db.Column(db.String(20), nullable=False)
+
+    def __repr__(self):
+        return f'<Event {self.title}>'

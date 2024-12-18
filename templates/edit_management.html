@@ -38,7 +38,11 @@
             </option>
             {% endfor %}
         </select>
-
+        <div class="mb-3">
+          <label for="eventDate" class="form-label">Дата и время занятия</label>
+          <input type="datetime-local" class="form-control" id="eventDate" name="event_date" required>
+      </div>
+  
         <button type="submit">Сохранить изменения</button>
     </form>
 

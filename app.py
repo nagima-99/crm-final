@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 from datetime import datetime
 from forms import AdministratorForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm
-from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, ManageTeacher
+from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, ManageTeacher, Event
 from functools import wraps
 
 # Инициализация приложения
@@ -446,6 +446,7 @@ def edit_management(id):
         course_id = int(request.form.get('course_id'))
         group_id = int(request.form.get('group_id'))
         teacher_id = int(request.form.get('teacher_id'))  # Получаем teacher_id из формы
+        event_date = request.form.get('event_date')  # Получаем дату и время занятия
 
         # Создаем или обновляем запись о студенте
         if not manage_student:
@@ -457,18 +458,28 @@ def edit_management(id):
         # Создаем или обновляем запись о преподавателе
         if not manage_teacher:
             manage_teacher = ManageTeacher(
-                teacher_id=teacher_id,  # Используем teacher_id
+                teacher_id=teacher_id,  
                 group_id=group_id,
                 course_id=course_id
             )
         else:
             manage_teacher.course_id = course_id
             manage_teacher.group_id = group_id
-            manage_teacher.teacher_id = teacher_id  # Обновляем teacher_id
+            manage_teacher.teacher_id = teacher_id
 
         db.session.add(manage_teacher)
 
-        db.session.commit()
+        # Добавляем событие в базу данных
+        if event_date:
+            title = f"{Course.query.get(course_id).course_name} - Группа {Group.query.get(group_id).group_name}"
+            new_event = Event(
+                title=title,
+                start=event_date,  # Используем выбранную дату и время начала
+                end=event_date,    # Для простоты, ставим одинаковое время окончания
+            )
+            db.session.add(new_event)  # Добавляем событие в сессию базы данных
+
+        db.session.commit()  # Сохраняем все изменения в базе данных
         flash('Изменения сохранены!')
         return redirect(url_for('management'))
 
@@ -484,6 +495,44 @@ def edit_management(id):
         current_teacher_id=current_teacher_id  # Передаем ID текущего преподавателя
     )
 
+@app.route('/schedule_management')
+def schedule_management():
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()  # Извлекаем объект администратора
+    courses = Course.query.all()  # Получаем все курсы
+    groups = Group.query.all()  # Получаем все группы
+    teachers = Teacher.query.all()  # Получаем всех преподавателей
+
+    return render_template('schedule_management.html', administrator=administrator, courses=courses, groups=groups, teachers=teachers)
+
+@app.route('/update_event', methods=['POST'])
+def update_event():
+    data = request.get_json()
+    event_id = data['id']
+    start_time = data['start']
+    end_time = data['end']
+
+    # Найти событие по ID и обновить время
+    for event in events:
+        if event['id'] == event_id:
+            event['start'] = start_time
+            event['end'] = end_time
+            return jsonify(event)
+    
+    return jsonify({'error': 'Event not found'}), 404
+
+@app.route('/get_events', methods=['GET'])
+def get_events():
+    events = Event.query.all()  # Извлекаем события из базы данных
+    events_list = [
+        {
+            'id': event.id,
+            'title': event.title,
+            'start': event.start,
+            'end': event.end,
+        }
+        for event in events
+    ]
+    return jsonify(events_list)
 
 
 # Страница выхода

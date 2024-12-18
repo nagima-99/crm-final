@@ -1,0 +1,66 @@
+{% extends "base_administrator.html" %}
+{% block content %}
+<h2>Управление расписанием</h2>
+
+<div id="calendar"></div>
+
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales-all.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',  // Недельный вид по умолчанию
+            locale: 'ru',  // Локализация календаря
+            editable: true,  // Позволяет редактировать события
+            selectable: true,  // Позволяет выбирать дату
+            headerToolbar: {
+                left: 'prev,next today',  // Кнопки для навигации
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'  // Переключение между месяцем, неделей и днем
+            },
+            events: '/get_events',  // URL для получения событий
+            dateClick: function(info) {
+                var title = prompt('Введите название занятия:');
+                if (title) {
+                    fetch('/add_event', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            title: title,
+                            start: info.dateStr,
+                            end: info.dateStr  // Для простоты используем один день для событий
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(event => {
+                        calendar.addEvent(event);  // Добавляем новое событие в календарь
+                    });
+                }
+            },
+            eventDrop: function(info) {
+                // Обработка перемещения события
+                fetch('/update_event', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: info.event.id,
+                        start: info.event.start.toISOString(),
+                        end: info.event.end ? info.event.end.toISOString() : null
+                    }),
+                });
+            },
+        });
+
+        calendar.render();
+    });
+</script>
+{% endblock %}
