@@ -3,7 +3,17 @@
 {% block title %}Добавить группу{% endblock %}
 
 {% block content %}
-<div class="group-form ">
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+<div class="group-form">
+    <div class="group-form-container">
     <form method="POST" action="{{ url_for('add_group') }}">
         {{ form.hidden_tag() }}
         
@@ -12,8 +22,21 @@
             {{ form.group_name(class="input") }}
         </div>
         <div>
-            <button type="submit">Добавить новую группу</button>
+            <button type="submit" class="add-btn">Добавить новую группу</button>
+        </div>
+        <!-- Дата и время начала занятия -->
+        <div class="mb-3">
+            <label for="startDate" class="form-label">Дата и время начала занятия</label>
+            <input type="text" class="form-control" id="startDate" name="start_date" required>
+        </div>
+
+        <!-- Дата и время окончания занятия -->
+        <div class="mb-3">
+            <label for="endDate" class="form-label">Дата и время окончания занятия</label>
+            <input type="text" class="form-control" id="endDate" name="end_date" required>
         </div>
     </form>
+    <a href="{{ url_for('list_groups') }}" class="back-link">Назад</a>
+</div>
 </div>
 {% endblock %}

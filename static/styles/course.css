@@ -1,55 +1,166 @@
 /* Общий контейнер для таблицы курсов */
 .course-form {
+    position: relative; /* Контейнер является родителем для позиционирования */
+    padding-bottom: 50px;
     width: 100%;
-    margin: 20px auto;
-    padding: 20px;
+    margin: 0px auto;
     background: #ffffff;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc; /* Добавить границу вокруг календаря */
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
+    padding: 20px; /* Внутренний отступ */
+    min-height: calc(100vh - 160px);
 }
 
 /* Заголовок формы */
 .course-form h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #444;
+    color: #0044cc; /* Темно-синий цвет */
+    text-align: center; /* Центрируем текст */
+    border-bottom: 2px solid #0044cc; /* Нижняя граница */
+    padding-bottom: 10px; /* Отступ от текста до границы */
+    font-weight: bold; /* Жирный шрифт */
 }
 
 /* Ссылка для добавления нового курса */
 .add-course-link {
     display: block;
-    margin-bottom: 20px;
     text-align: right;
     text-decoration: none;
     color: #007bff;
     font-weight: bold;
 }
 
-/* Стили для таблицы курсов */
-.course-list-table {
+/* Table styling */
+table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-}
+    background-color: #fff;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
 
-.course-list-table th, .course-list-table td {
-    border: 1px solid #ddd;
-    padding: 12px;
+  th, td {
+    padding: 12px 15px;
     text-align: left;
-}
+    border-bottom: 1px solid #ddd;
+  }
 
-/* Заголовки таблицы */
-.course-list-table th {
+  th {
     background-color: #f2f2f2;
-    font-weight: bold;
-    color: #333;
-}
+    color: #555;
+  }
 
-/* Строки таблицы */
-.course-list-table tr:nth-child(even) {
+  tr:nth-child(even) {
     background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+
+.course-btn-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
 }
 
-.course-list-table tr:hover {
-    background-color: #f1f1f1;
+.course-btn-container a {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.course-btn-container a:hover {
+    background-color: #0056b3;
+}
+
+.pagination {
+    position: absolute; /* Позиционируем относительно контейнера */
+    bottom: 15px; /* Отступ от нижней границы */
+    left: 50%; /* Центрируем по горизонтали */
+    transform: translateX(-50%); /* Смещаем назад на половину ширины */
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.pagination a, .pagination span {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+}
+
+.pagination a:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination .current {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.course-form-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #ccc; /* Добавить границу вокруг календаря */
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
+    padding: 10px; 
+}
+
+.add-btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: bold;
+}
+
+.add-btn:hover {
+    background-color: #0056b3;
+}
+
+.course-form-container .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.course-form-container .back-link:hover {
+    text-decoration: underline;
+}
+
+.course-form-container .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.course-form-container .back-link:hover {
+    text-decoration: underline;
 }

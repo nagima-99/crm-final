@@ -3,7 +3,17 @@
 {% block title %}Редактировать группу{% endblock %}
 
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 <div class="course-form">
+    <div class="course-form-container">
     <form method="POST" action="{{ url_for('add_course') }}">
         {{ form.hidden_tag() }}
         <div>
@@ -18,6 +28,9 @@
             <label for="price">Абонемент:</label>
             {{ form.price(class="input") }}
         </div>
-        <button type="submit" class="btn">Добавить новый курс</button>
+        <button type="submit" class="add-btn">Добавить новый курс</button>
     </form>
+    <a href="{{ url_for('list_courses') }}" class="back-link">Назад</a>
+</div>
+</div>
 {% endblock %}

@@ -1,25 +1,32 @@
-/* Общие стили для списка учителей */
+/* Общие стили для списка студентов */
 .teacher-list-container {
+    position: relative; /* Контейнер является родителем для позиционирования */
+    padding-bottom: 50px;
     width: 100%;
-    margin: 20px auto;
-    padding: 20px;
+    margin: 0px auto;
     background: #ffffff;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc; /* Добавить границу вокруг календаря */
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
+    padding: 20px; /* Внутренний отступ */
+    min-height: calc(100vh - 160px);
 }
 
 /* Заголовок списка */
-.teacher-list-container h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #444;
+.teacher-list-container h2 {
+    color: #0044cc; /* Темно-синий цвет */
+    text-align: center; /* Центрируем текст */
+    border-bottom: 2px solid #0044cc; /* Нижняя граница */
+    padding-bottom: 10px; /* Отступ от текста до границы */
+    font-weight: bold; /* Жирный шрифт */
 }
 
-/* Стили для кнопки добавления учителя */
+/* Стили для кнопки добавления студента */
 .add-teacher-btn-container {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
+    margin-top: 15px;
 }
 
 .add-teacher-btn-container a {
@@ -36,24 +43,67 @@
     background-color: #0056b3;
 }
 
-/* Стили для таблицы учителей */
-.teacher-table {
+.add-teacher-link {
+  display: block;
+  text-align: right;
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+}
+
+/* Table styling */
+table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-}
+    background-color: #fff;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
 
-.teacher-table th, .teacher-table td {
-    padding: 12px;
-    border: 1px solid #ddd;
+  th, td {
+    padding: 12px 15px;
     text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #f2f2f2;
+    color: #555;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+
+.pagination {
+    position: absolute; /* Позиционируем относительно контейнера */
+    bottom: 15px; /* Отступ от нижней границы */
+    left: 50%; /* Центрируем по горизонтали */
+    transform: translateX(-50%); /* Смещаем назад на половину ширины */
+    display: flex;
+    justify-content: center;
+    gap: 5px;
 }
 
-.teacher-table th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-}
-
-.teacher-table td {
+.pagination a, .pagination span {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    text-decoration: none;
     color: #333;
+    border-radius: 4px;
 }
+
+.pagination a:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination .current {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+

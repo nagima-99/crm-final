@@ -1,8 +1,81 @@
 {% extends "base_administrator.html" %}
 {% block content %}
-<h2>Управление расписанием</h2>
 
-<div id="calendar"></div>
+<div id="calendar">
+</div>
+<!-- Модальное окно (собственное, без Bootstrap) -->
+<div id="eventModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Детали события</h3>
+        <p><strong>Название события:</strong> <span id="eventTitle"></span></p>
+        <p><strong>Дата и время начала:</strong> <span id="eventStart"></span></p>
+        <p><strong>Дата и время окончания:</strong> <span id="eventEnd"></span></p>
+        <button id="closeModal" class="modal-close-btn">Закрыть</button>
+    </div>
+</div>
+<style>
+    #calendar {
+        max-width: 100%; /* Ширина в процентах от родительского элемента */
+        height: calc(100vh - 160px); /* Высота в процентах от высоты окна */
+        margin: 0 auto;
+        background-color: #f9f9f9; /* Светло-серый фон */
+        border: 1px solid #ccc; /* Добавить границу вокруг календаря */
+        border-radius: 8px; /* Закругленные углы */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
+        padding: 20px; /* Внутренний отступ */
+    }
+        /* Стили для модального окна */
+        .modal {
+        display: none; /* Скрыто по умолчанию */
+        position: fixed;
+        z-index: 10;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Темный фон */
+        overflow: auto; /* Для прокрутки при необходимости */
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 500px;
+    }
+
+    .close-btn {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        position: absolute;
+        top: 10px;
+        right: 20px;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal-close-btn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .modal-close-btn:hover {
+        background-color: #45a049;
+    }
+</style>
 
 <!-- FullCalendar -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
@@ -12,55 +85,57 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
+        var modal = document.getElementById('eventModal');
+        var closeModalButton = document.getElementById('closeModal');
+        var closeBtn = document.getElementsByClassName('close-btn')[0];
+
+        // Открытие модального окна
+        var openModal = function(event) {
+            document.getElementById('eventTitle').innerText = event.title || 'Без названия';
+            document.getElementById('eventStart').innerText = event.start.toLocaleString();
+            document.getElementById('eventEnd').innerText = event.end ? event.end.toLocaleString() : 'Не указано';
+
+            // Показ модального окна
+            modal.style.display = 'block';
+        };
+
+        // Закрытие модального окна
+        var closeModal = function() {
+            modal.style.display = 'none';
+        };
+
+        // Закрытие при клике на кнопку
+        closeModalButton.addEventListener('click', closeModal);
+
+        // Закрытие при клике на крестик
+        closeBtn.addEventListener('click', closeModal);
+
+        // Закрытие при клике на темный фон (мимо модального окна)
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
 
         var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',  // Недельный вид по умолчанию
-            locale: 'ru',  // Локализация календаря
-            editable: true,  // Позволяет редактировать события
-            selectable: true,  // Позволяет выбирать дату
+            initialView: 'timeGridWeek',
+            locale: 'ru',
+            editable: false,
+            selectable: true,
             headerToolbar: {
-                left: 'prev,next today',  // Кнопки для навигации
+                left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'  // Переключение между месяцем, неделей и днем
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            events: '/get_events',  // URL для получения событий
-            dateClick: function(info) {
-                var title = prompt('Введите название занятия:');
-                if (title) {
-                    fetch('/add_event', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            title: title,
-                            start: info.dateStr,
-                            end: info.dateStr  // Для простоты используем один день для событий
-                        }),
-                    })
-                    .then(response => response.json())
-                    .then(event => {
-                        calendar.addEvent(event);  // Добавляем новое событие в календарь
-                    });
-                }
-            },
-            eventDrop: function(info) {
-                // Обработка перемещения события
-                fetch('/update_event', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id: info.event.id,
-                        start: info.event.start.toISOString(),
-                        end: info.event.end ? info.event.end.toISOString() : null
-                    }),
-                });
-            },
+            events: '/get_events', // URL для получения событий
+            eventClick: function(info) {
+                var event = info.event;
+                openModal(event); // Открываем модальное окно
+            }
         });
 
         calendar.render();
     });
+
 </script>
 {% endblock %}

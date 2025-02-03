@@ -1,10 +1,19 @@
 {% extends "base_administrator.html" %}
 
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 <div class="teacher-list-container">
-    <h1>Список учителей</h1>
+    <h2>Список учителей</h2>
     <div class="add-teacher-btn-container">
-        <a href="{{ url_for('register_teacher') }}">Добавить учителя</a>
+        <a href="{{ url_for('register_teacher') }}" class="add-teacher-link">Добавить учителя</a>
     </div>
     <table class="table">
         <thead>
@@ -15,7 +24,7 @@
                 <th>Телефон</th>
                 <th>Электронная почта</th>
                 <th>Адрес</th>
-                <th>Действия</th>
+                <th>Удалить</th>
             </tr>
         </thead>
         <tbody>
@@ -34,6 +43,28 @@
             {% endfor %}
         </tbody>
     </table>
+      <!-- Пагинация -->
+      <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('teachers_list', page=pagination.prev_num) }}">Назад</a>
+        {% endif %}
+      
+        {% for page_num in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                    <span class="current">{{ page_num }}</span>
+                {% else %}
+                    <a href="{{ url_for('teachers_list', page=page_num) }}">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span class="ellipsis">…</span>
+            {% endif %}
+        {% endfor %}
+      
+        {% if pagination.has_next %}
+            <a href="{{ url_for('teachers_list', page=pagination.next_num) }}">Вперёд</a>
+        {% endif %}
+      </div>
 </div>
 
 {% endblock %}

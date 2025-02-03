@@ -3,7 +3,17 @@
 {% block title %}Редактировать группу{% endblock %}
 
 {% block content %}
-<div class="group-form ">
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+<div class="group-form">
+    <div class="group-form-container">
     <form method="POST" action="{{ url_for('edit_group', id=group.id) }}">
         {{ form.hidden_tag() }}
         
@@ -11,9 +21,9 @@
             <label for="group_name">Название группы:</label>
             {{ form.group_name(class="input") }}
         </div>
-        <div>
-            <button type="submit">Сохранить изменения</button>
-        </div>
+        <button type="submit" class="add-btn">Сохранить изменения</button>
     </form>
+    <a href="{{ url_for('list_groups') }}" class="back-link">Назад</a>
+    </div>
 </div>
 {% endblock %}

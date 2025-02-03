@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="form-container">
+    <div class="management-form-container">
     <form method="POST">
         <!-- Курс -->
         <label for="course_id">Курс:</label>
@@ -38,15 +39,38 @@
             </option>
             {% endfor %}
         </select>
-        <div class="mb-3">
-          <label for="eventDate" class="form-label">Дата и время занятия</label>
-          <input type="datetime-local" class="form-control" id="eventDate" name="event_date" required>
-      </div>
-  
-        <button type="submit">Сохранить изменения</button>
+
+        <!-- Дата и время начала занятия -->
+        <div class="manage-date">
+            <label for="startDate" class="form-label">Дата и время начала занятия</label>
+            <input type="text" class="form-control flatpickr-input" id="startDate" name="start_date" required>
+        </div>
+
+        <!-- Дата и время окончания занятия -->
+        <div class="manage-date">
+            <label for="endDate" class="form-label">Дата и время окончания занятия</label>
+            <input type="text" class="form-control flatpickr-input" id="endDate" name="end_date" required>
+        </div>
+
+        <button type="submit" class="add-btn">Сохранить изменения</button>
     </form>
 
     <a href="{{ url_for('management') }}" class="back-link">Назад</a>
+    </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr("#startDate", {
+            enableTime: true, // Включает выбор времени
+            dateFormat: "Y-m-d H:i", // Формат даты и времени
+            time_24hr: true, // 24-часовой формат
+        });
+        flatpickr("#endDate", {
+            enableTime: true, // Включает выбор времени
+            dateFormat: "Y-m-d H:i", // Формат даты и времени
+            time_24hr: true, // 24-часовой формат
+        });
+    });
+</script>
 {% endblock %}

@@ -1,6 +1,15 @@
 {% extends "base_administrator.html" %}
 {% block title %}Регистрация преподавателя{% endblock %}
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 <div class="register-teacher-form">
     <h2>Регистрация преподавателя</h2>
     <form method="POST">
@@ -57,16 +66,6 @@
         </div>
         <button type="submit" class="btn">Зарегистрировать преподавателя</button>
     </form>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flashed-messages">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }}" role="alert">
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+    <a href="{{ url_for('teachers_list') }}" class="back-link">Назад</a>
 </div>
 {% endblock %}

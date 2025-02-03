@@ -1,48 +1,48 @@
-/* Стили для формы регистрации преподавателя */
-.register-teacher-form {
+.update-user-form {
     width: 100%;
     margin: 0px auto;
-    padding: 20px;
     background: #ffffff;
     border: 1px solid #ccc; /* Добавить границу вокруг календаря */
     border-radius: 8px; /* Закругленные углы */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
+    padding: 20px; /* Внутренний отступ */
     min-height: calc(100vh - 160px);
 }
 
-.register-teacher-form h2 {
-    color: #0044cc; /* Темно-синий цвет */
-    text-align: center; /* Центрируем текст */
-    border-bottom: 2px solid #0044cc; /* Нижняя граница */
-    padding-bottom: 10px; /* Отступ от текста до границы */
-    font-weight: bold; /* Жирный шрифт */
+.update-user-form h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 28px;
+    color: #007bff;
 }
 
-.register-teacher-form label {
-    display: block;
-    margin: 15px 0 5px;
-    font-weight: bold;
-}
-
-/* Контейнеры для строк и столбцов */
-.register-teacher-form .form-row {
+.update-user-form .form-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px; /* Отступ между колонками */
+    gap: 20px;
     margin-bottom: 5px;
 }
 
-.register-teacher-form .form-column {
+.update-user-form .form-column {
     flex: 1;
-    min-width: calc(50% - 10px); /* Два столбца с отступом */
+    min-width: calc(50% - 10px);
     max-width: 48%;
 }
 
-/* Стили для полей ввода */
-.register-teacher-form .input {
+.update-user-form .form-column:last-child {
+    margin-right: 0;
+}
+
+.update-user-form label {
+    display: block;
+    margin: 5px 0 5px;
+    font-weight: bold;
+}
+
+.update-user-form .input {
     width: 100%;
     padding: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
@@ -50,7 +50,7 @@
 }
 
 /* Стили кнопки */
-.register-teacher-form .btn {
+.update-user-form .btn {
     padding: 10px 20px;
     background-color: #007bff;
     color: white;
@@ -64,14 +64,36 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 30px;
 }
 
-.register-teacher-form .btn:hover {
+.update-user-form .btn:hover {
     background-color: #0056b3;
 }
 
-.register-teacher-form .back-link {
+.update-user-form .form-row-pass {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.update-user-form .form-column-pass {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.form-column-pass:last-child {
+    margin-right: 0;
+}
+
+.form-column-pass .input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.update-user-form .back-link {
     display: block;
     text-align: center;
     margin-top: 10px;
@@ -80,6 +102,6 @@
     text-decoration: none;
 }
 
-.register-teacher-form .back-link:hover {
+.update-user-form .back-link:hover {
     text-decoration: underline;
 }

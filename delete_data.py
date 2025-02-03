@@ -1,4 +1,4 @@
-from app import db, ManageStudent, ManageTeacher, app  # Импортируйте необходимые модули и классы из вашего приложения
+from app import db, ManageStudent, ManageTeacher, Schedule, app  # Импортируйте необходимые модули и классы из вашего приложения
 
 def delete_records(model, model_name):
     """
@@ -19,3 +19,4 @@ def delete_records(model, model_name):
 if __name__ == "__main__":
     delete_records(ManageStudent, "ManageStudent")
     delete_records(ManageTeacher, "ManageTeacher")
+    delete_records(Schedule, "ManageTeacher")

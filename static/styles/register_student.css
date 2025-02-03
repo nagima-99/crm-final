@@ -1,26 +1,28 @@
 /* Стили для формы регистрации ученика */
 .register-student-form {
-    /* Контейнер формы */
     width: 100%;
-    margin: 20px auto;
+    margin: 0px auto;
     padding: 20px;
     background: #ffffff;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc; /* Добавить границу вокруг календаря */
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
+    min-height: calc(100vh - 160px);
 }
 
 /* Стили заголовков */
-.register-student-form h2,
-.register-student-form h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #444;
+.register-student-form h2 {
+    color: #0044cc; /* Темно-синий цвет */
+    text-align: center; /* Центрируем текст */
+    border-bottom: 2px solid #0044cc; /* Нижняя граница */
+    padding-bottom: 10px; /* Отступ от текста до границы */
+    font-weight: bold; /* Жирный шрифт */
 }
 
 /* Стили для меток (label) */
 .register-student-form label {
     display: block;
-    margin: 10px 0 5px;
+    margin: 5px 0 5px;
     font-weight: bold;
 }
 
@@ -29,7 +31,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
 }
 
 /* Колонки формы */
@@ -43,7 +45,7 @@
 .register-student-form .input {
     width: 100%;
     padding: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
@@ -73,14 +75,81 @@
 
 /* Стили для заголовка секции "Данные клиента" */
 .register-student-form h3 {
-    margin-top: 30px;
+    margin-top: 20px;
     border-top: 1px solid #ccc;
     padding-top: 15px;
 }
 
-/* Стиль на мобильных устройствах для одного столбца */
-@media (max-width: 768px) {
-    .register-student-form .form-column {
-        min-width: 100%;
-    }
+.form-row-student {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.form-column-student {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.form-column-student:last-child {
+    margin-right: 0;
+}
+
+.form-column-student .input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#flash-messages {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 600px;
+}
+.flash-message {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    animation: fadeout 4s forwards;
+}
+.flash-message.success {
+    background-color: #28a745; /* Зеленый */
+}
+.flash-message.danger {
+    background-color: #dc3545; /* Красный */
+}
+.flash-message.info {
+    background-color: #17a2b8; /* Голубой */
+}
+.flash-message.warning {
+    background-color: #ffc107; /* Желтый */
+}
+
+@keyframes fadeout {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; display: none; }
+}
+
+.register-student-form .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.register-student-form .back-link:hover {
+    text-decoration: underline;
 }

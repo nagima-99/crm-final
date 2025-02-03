@@ -1,12 +1,22 @@
 {% extends "base_administrator.html" %}
 
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
   <div class="student-list-container">
-    <h1>Список студентов</h1>
+    <h2>Список учеников</h2>
 
     <!-- Кнопка добавления студента -->
     <div class="add-student-btn-container">
-        <a href="{{ url_for('register_student') }}" class="btn btn-add-student">Добавить студента</a>
+        <a href="{{ url_for('register_student') }}" class="add-student-link">Добавить студента</a>
     </div>
 
     <table class="table">
@@ -28,12 +38,34 @@
             <td>{{ student.phone }}</td>
             <td>{{ student.user.email }}</td>
             <td>{{ student.address }}</td>
-            <td>
+            <td class="table-cell">
                 <a href="{{ url_for('delete_student', id=student.id) }}" class="btn-danger"><i class="fa fa-trash"></i></a>
               </td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
+      <!-- Пагинация -->
+<div class="pagination">
+  {% if pagination.has_prev %}
+      <a href="{{ url_for('students_list', page=pagination.prev_num) }}">Назад</a>
+  {% endif %}
+
+  {% for page_num in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+      {% if page_num %}
+          {% if page_num == pagination.page %}
+              <span class="current">{{ page_num }}</span>
+          {% else %}
+              <a href="{{ url_for('students_list', page=page_num) }}">{{ page_num }}</a>
+          {% endif %}
+      {% else %}
+          <span class="ellipsis">…</span>
+      {% endif %}
+  {% endfor %}
+
+  {% if pagination.has_next %}
+      <a href="{{ url_for('students_list', page=pagination.next_num) }}">Вперёд</a>
+  {% endif %}
+</div>
   </div>
 {% endblock %}

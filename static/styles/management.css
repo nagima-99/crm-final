@@ -1,66 +1,112 @@
+.management-form {
+    position: relative; /* Контейнер является родителем для позиционирования */
+    padding-bottom: 50px;
+    width: 100%;
+    margin: 0px auto;
+    background: #ffffff;
+    border: 1px solid #ccc; /* Добавить границу вокруг календаря */
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
+    padding: 20px; /* Внутренний отступ */
+    min-height: calc(100vh - 160px);
+}
 
+/* Заголовок формы */
+.management-form h2 {
+    color: #0044cc; /* Темно-синий цвет */
+    text-align: center; /* Центрируем текст */
+    border-bottom: 2px solid #0044cc; /* Нижняя граница */
+    padding-bottom: 10px; /* Отступ от текста до границы */
+    font-weight: bold; /* Жирный шрифт */
+}
 
 /* Стили для таблицы управления студентами */
-.student-table {
+table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    background-color: #ffffff;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+    background-color: #fff;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
 
-/* Стили для заголовков таблицы */
-.student-table th {
-    padding: 12px;
-    background-color: #aeb0b3;
-    color: #333;
+  th, td {
+    padding: 12px 15px;
     text-align: left;
-}
+    border-bottom: 1px solid #ddd;
+  }
 
-/* Стили для строк таблицы */
-.student-table td {
-    padding: 12px;
-    border: 1px solid #ddd;
-}
+  th {
+    background-color: #f2f2f2;
+    color: #555;
+  }
 
-/* Строки таблицы */
-.student-table tr:nth-child(even) {
+  tr:nth-child(even) {
     background-color: #f9f9f9;
-}
+  }
 
-/* При наведении на строку */
-.student-table tr:hover {
+  tr:hover {
     background-color: #f1f1f1;
+  }
+
+.pagination {
+    position: absolute; /* Позиционируем относительно контейнера */
+    bottom: 15px; /* Отступ от нижней границы */
+    left: 50%; /* Центрируем по горизонтали */
+    transform: translateX(-50%); /* Смещаем назад на половину ширины */
+    display: flex;
+    justify-content: center;
+    gap: 5px;
 }
 
-/* Стили для ссылок в таблице */
-.student-table a {
-    color: #007bff;
+.pagination a, .pagination span {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
     text-decoration: none;
-    font-weight: bold;
+    color: #333;
+    border-radius: 4px;
 }
 
-/* При наведении на ссылку */
-.student-table a:hover {
-    text-decoration: underline;
+.pagination a:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination .current {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
 }
 
 /* Стили для кнопки "Назад" */
-.back-link {
+.management-form-container .back-link {
     display: block;
     text-align: center;
-    margin-top: 20px;
-    font-size: 1.2em;
+    margin-top: 10px;
+    font-size: 16px;
     color: #007bff;
     text-decoration: none;
 }
 
-.back-link:hover {
+.management-form-container .back-link:hover {
     text-decoration: underline;
 }
 
 /* Для таблицы с действиями */
 .student-table .actions {
     text-align: center;
+}
+
+.mb-3 {
+  margin-top: -20px;
+  margin-bottom: 20px;
+}
+
+.management-form-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #ccc; /* Добавить границу вокруг календаря */
+  border-radius: 8px; /* Закругленные углы */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
 }

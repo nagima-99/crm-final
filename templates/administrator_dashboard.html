@@ -1,46 +1,96 @@
 {% extends "base_administrator.html" %}
+
 {% block title %}Профиль{% endblock %}
+
 {% block content %}
-<main>
-    <section class="profile">
-        <h2>Информация об {{ administrator.first_name }} {{ administrator.surname }}</h2>
-        <ul>
-            <li><strong>Дата рождения:</strong> {{ administrator.birth_date }}</li>
-            <li><strong>Возраст:</strong> {{ age }}</li>
-            <li><strong>Телефон:</strong> {{ administrator.phone or "Не указано" }}</li>
-            <li><strong>Адрес:</strong> {{ administrator.address or "Не указано" }}</li>
-            <li><strong>Название офиса:</strong> {{ administrator.office_name }}</li>
-            <li><strong>Адрес офиса:</strong> {{ administrator.office_address }}</li>
-        </ul>
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <section class="profile-container">
+        <div class="profile-header">
+            <h2>Информация об {{ administrator.first_name }} {{ administrator.surname }}</h2>
+        </div>
+
+        <div class="profile-body">
+            <div class="profile-photo-section">
+                <h3>Фото</h3>
+                <div class="profile-photo-container">
+                    <!-- Круглый контейнер для фотографии -->
+                    <div id="photo-clickable-container" class="photo-clickable-container">
+                        {% if user.photo %}
+                            <img src="{{ url_for('static', filename='uploads/' + user.photo) }}" alt="Фото пользователя" class="profile-photo" id="current-photo">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/default.png') }}" alt="Фото пользователя" class="profile-photo" id="current-photo">
+                        {% endif %}
+                    </div>
+
+                    <!-- Форма для загрузки фото (спрятана по умолчанию) -->
+                    <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_photo', id=administrator.admin_id) }}" class="upload-photo-form" id="upload-photo-form">
+                        <input type="file" name="photo" id="photo" accept="image/*" class="upload-input" style="display:none;">
+                        <button type="submit" class="btn btn-upload">Загрузить</button>
+                    </form>
+                </div>
+                {% if user.photo %}
+                    <form method="POST" action="{{ url_for('delete_photo', id=user.id) }}" class="delete-photo-form">
+                        <button type="submit" class="btn btn-danger">Удалить фото</button>
+                    </form>
+                {% endif %}
+            </div>
+
+            <div class="profile-details">
+                <h3>Личные данные</h3>
+                <div class="profile-info">
+                    <div class="profile-item">
+                        <strong>Дата рождения:</strong> <span>{{ administrator.birth_date }}</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Возраст:</strong> <span>{{ age }}</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Телефон:</strong> <span>{{ administrator.phone or "Не указано" }}</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Адрес:</strong> <span>{{ administrator.address or "Не указано" }}</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('update_user', id=administrator.admin_id) }}" class="btn btn-update">Обновить информацию</a>
+            </div>
+            <div class="profile-office">
+                <h3>Информация об офисе</h3>
+                <div class="profile-info">
+                    <div class="profile-item">
+                        <strong>Название офиса:</strong> <span>{{ administrator.office_name or "Не указано" }}</span>
+                    </div>
+                    <div class="profile-item">
+                        <strong>Адрес офиса:</strong> <span>{{ administrator.office_address or "Не указано" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <section class="update-form">
-        <h2>Обновите вашу информацию</h2>
-        <form method="POST">
-            {{ form.hidden_tag() }}
-            <label for="surname">Фамилия:</label>
-            {{ form.surname(class="input") }}
+<script>
+    // Получаем элементы
+    const photoContainer = document.getElementById("photo-clickable-container");
+    const photoInput = document.getElementById("photo");
 
-            <label for="first_name">Имя:</label>
-            {{ form.first_name(class="input") }}
+    // Когда пользователь кликает по изображению, открываем форму загрузки
+    photoContainer.addEventListener("click", function() {
+        photoInput.click(); // Открыть диалог выбора файла
+    });
 
-            <label for="patronymic">Отчество:</label>
-            {{ form.patronymic(class="input") }}
+    // Когда файл выбран, отправляем форму
+    photoInput.addEventListener("change", function() {
+        if (photoInput.files.length > 0) {
+            document.getElementById("upload-photo-form").submit(); // Отправляем форму
+        }
+    });
+</script>
 
-            <label for="phone">Телефон:</label>
-            {{ form.phone(class="input") }}
-
-            <label for="address">Адрес:</label>
-            {{ form.address(class="input") }}
-
-            <label for="office_name">Название офиса:</label>
-            {{ form.office_name(class="input") }}
-
-            <label for="office_address">Адрес офиса:</label>
-            {{ form.office_address(class="input") }}
-
-            <button type="submit" class="btn">Сохранить изменения</button>
-        </form>
-    </section>
-</main>
 {% endblock %}

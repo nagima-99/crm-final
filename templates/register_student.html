@@ -1,6 +1,15 @@
 {% extends "base_administrator.html" %}
 {% block title %}Регистрация ученика{% endblock %}
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 <div class="register-student-form">
     <h2>Регистрация ученика</h2>
     <form method="POST">
@@ -35,50 +44,50 @@
                 {{ form.confirm_password(class="input") }}
             </div>
         </div>
-        <div class="form-row">
-            <div class="form-column">
+        <div class="form-row-student">
+            <div class="form-column-student">
                 <label for="birth_date">Дата рождения:</label>
                 {{ form.birth_date(class="input") }}
             </div>
-            <div class="form-column">
+            <div class="form-column-student">
                 <label for="phone">Телефон:</label>
                 {{ form.phone(class="input") }}
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-column">
+            <div class="form-column-student">
                 <label for="address">Адрес:</label>
                 {{ form.address(class="input") }}
             </div>
         </div>
+
         <h3>Данные клиента</h3>
-        <div class="form-row">
-            <div class="form-column">
+        <div class="form-row-student">
+            <div class="form-column-student">
                 <label for="client_name">Имя клиента:</label>
                 {{ form.client_name(class="input") }}
             </div>
-            <div class="form-column">
+            <div class="form-column-student">
                 <label for="client_relation">Связь с учеником:</label>
                 {{ form.client_relation(class="input") }}
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-column">
+            <div class="form-column-student">
                 <label for="client_phone">Телефон клиента:</label>
                 {{ form.client_phone(class="input") }}
             </div>
-            <div class="form-column">
-                <label for="client_workplace">Место работы клиента:</label>
-                {{ form.client_workplace(class="input") }}
-            </div>
         </div>
-        <div class="form-row">
-            <div class="form-column">
-                <label for="client_position">Должность клиента:</label>
-                {{ form.client_position(class="input") }}
-            </div>
-        </div>
+
         <button type="submit" class="btn">Зарегистрировать ученика</button>
     </form>
+    <a href="{{ url_for('students_list') }}" class="back-link">Назад</a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000); // 4 секунды
+        });
+    });
+</script>
 {% endblock %}

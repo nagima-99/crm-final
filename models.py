@@ -12,7 +12,8 @@ class Users(db.Model, UserMixin):
     role = db.Column(db.String(20), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.now)
-
+    photo = db.Column(db.String(120), nullable=True)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -44,8 +45,6 @@ class Student(db.Model):
     client_name = db.Column(db.String(255), nullable=True)
     client_relation = db.Column(db.String(100), nullable=True)
     client_phone = db.Column(db.String(20), nullable=True)
-    client_workplace = db.Column(db.String(255), nullable=True)
-    client_position = db.Column(db.String(100), nullable=True)
     user = db.relationship('Users', backref='student', uselist=False)
 
 class Teacher(db.Model):
@@ -99,7 +98,7 @@ class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False) 
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)  
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.teacher_id'), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False) 
     end_time = db.Column(db.DateTime, nullable=False)   
     room = db.Column(db.String(50), nullable=True)  
