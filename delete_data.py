@@ -17,6 +17,7 @@ def delete_records(model, model_name):
             print(f"Ошибка при удалении записей из {model_name}: {e}")
 
 if __name__ == "__main__":
+    # Удаляем данные из таблиц в порядке зависимостей
+    delete_records(Schedule, "Schedule")  # Начинаем с таблицы Schedule
     delete_records(ManageStudent, "ManageStudent")
     delete_records(ManageTeacher, "ManageTeacher")
-    delete_records(Schedule, "ManageTeacher")

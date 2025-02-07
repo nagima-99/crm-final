@@ -706,12 +706,6 @@ def edit_management(id):
         course_id = int(request.form.get('course_id'))
         group_id = int(request.form.get('group_id'))
         teacher_id = int(request.form.get('teacher_id'))  # Получаем teacher_id из формы
-        start_date = request.form.get('start_date')  # Получаем дату начала
-        end_date = request.form.get('end_date')  # Получаем дату окончания
-
-        # Преобразуем строки в datetime объекты (если формат даты правильный)
-        start_datetime = datetime.strptime(start_date, '%Y-%m-%d %H:%M')
-        end_datetime = datetime.strptime(end_date, '%Y-%m-%d %H:%M')
 
         # Создаем или обновляем запись о студенте
         if not manage_student:
@@ -733,26 +727,6 @@ def edit_management(id):
             manage_teacher.teacher_id = teacher_id
 
         db.session.add(manage_teacher)
-
-        # Добавляем или обновляем запись о расписании
-        schedule = Schedule.query.filter_by(
-            course_id=course_id, group_id=group_id, teacher_id=teacher_id).first()
-
-        if not schedule:
-            # Создание нового расписания
-            schedule = Schedule(
-                course_id=course_id,
-                group_id=group_id,
-                teacher_id=teacher_id,
-                start_time=start_datetime,  # Сохраняем время начала
-                end_time=end_datetime,      # Сохраняем время окончания
-            )
-            db.session.add(schedule)
-        else:
-            # Обновление существующего расписания
-            schedule.start_time = start_datetime
-            schedule.end_time = end_datetime
-
         db.session.commit()  # Сохраняем все изменения в базе данных
         flash('Изменения сохранены!')
         return redirect(url_for('management'))
@@ -785,34 +759,66 @@ def get_events():
     events_list = [
         {
             'id': event.id,
-            'title': f'Курс {event.course.course_name}',  # Укажите как хотите отображать название
-            'start': event.start_time.isoformat(),  # Преобразуем дату в строку ISO
-            'end': event.end_time.isoformat() if event.end_time else None,
+            'title': event.course.course_name if event.course else "Не указано",
+            'start': datetime.combine(event.date, event.start_time).isoformat(),
+            'end': datetime.combine(event.date, event.end_time).isoformat() if event.end_time else None,
+            'extendedProps': {
+                'group_name': event.group.group_name if event.group else "Не указано",  # Название группы
+                'teacher_name': f"{event.teacher.first_name} {event.teacher.surname}" if event.teacher else "Не указано",  # ФИО преподавателя
+                'lesson_topic': event.lesson_topic  # Добавляем тему!
+            }
         }
         for event in events
     ]
     return jsonify(events_list)
 
-@app.route('/update_event', methods=['POST'])
-def update_event():
+@app.route('/add_schedule', methods=['POST'])
+@login_required
+@role_required('Администратор')
+def add_schedule():
     data = request.get_json()
-    event_id = data['id']
-    start_time = data['start']
-    end_time = data['end']
 
-    # Найти событие по ID
+    # Преобразуем start_time в дату и время
+    start_datetime = datetime.fromisoformat(data['start_time'])
+    end_datetime = datetime.fromisoformat(data['end_time'])
+
+    # Извлекаем дату и время
+    date = start_datetime.date()  # Дата занятия
+    start_time = start_datetime.time()  # Время начала
+    end_time = end_datetime.time()  # Время окончания
+
+    group_id = int(data['group_id'])
+    course_id = int(data['course_id'])
+    teacher_id = int(data['teacher_id'])
+
+    # Создаем новое расписание
+    new_schedule = Schedule(
+        date=date,
+        start_time=start_time,
+        end_time=end_time,
+        group_id=group_id,
+        course_id=course_id,
+        teacher_id=teacher_id
+    )
+
+    db.session.add(new_schedule)
+    db.session.commit()
+
+    return jsonify({'success': True})
+
+@app.route('/update_lesson_topic', methods=['POST'])
+def update_lesson_topic():
+    data = request.json
+    event_id = data.get('event_id')
+    new_topic = data.get('lesson_topic')
+
     event = Schedule.query.get(event_id)
     if event:
-        event.start_time = datetime.fromisoformat(start_time)
-        event.end_time = datetime.fromisoformat(end_time) if end_time else None
+        event.lesson_topic = new_topic
         db.session.commit()
-        return jsonify({
-            'id': event.id,
-            'start': event.start_time.isoformat(),
-            'end': event.end_time.isoformat() if event.end_time else None,
-        })
-    
-    return jsonify({'error': 'Event not found'}), 404
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Событие не найдено'})
 
 
 # Страница выхода

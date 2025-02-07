@@ -42,6 +42,7 @@
     transition: background-color 0.3s ease;
     width: auto;
     display: block;
+    margin-top: 10px;
     margin-left: auto;
     margin-right: auto;
 }

@@ -24,17 +24,7 @@
         <div>
             <button type="submit" class="add-btn">Добавить новую группу</button>
         </div>
-        <!-- Дата и время начала занятия -->
-        <div class="mb-3">
-            <label for="startDate" class="form-label">Дата и время начала занятия</label>
-            <input type="text" class="form-control" id="startDate" name="start_date" required>
-        </div>
-
-        <!-- Дата и время окончания занятия -->
-        <div class="mb-3">
-            <label for="endDate" class="form-label">Дата и время окончания занятия</label>
-            <input type="text" class="form-control" id="endDate" name="end_date" required>
-        </div>
+        
     </form>
     <a href="{{ url_for('list_groups') }}" class="back-link">Назад</a>
 </div>

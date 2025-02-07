@@ -1,51 +1,156 @@
 {% extends "base_administrator.html" %}
+
 {% block content %}
 
-<div id="calendar">
+<div class="content-btn">
+    <!-- Кнопка для добавления события -->
+    <button id="addEventButton">+ Добавить</button>
 </div>
-<!-- Модальное окно (собственное, без Bootstrap) -->
+<div id="calendar"></div>
+
+<!-- Модальное окно для добавления события -->
 <div id="eventModal" class="modal">
     <div class="modal-content">
         <span class="close-btn">&times;</span>
-        <h3>Детали события</h3>
-        <p><strong>Название события:</strong> <span id="eventTitle"></span></p>
-        <p><strong>Дата и время начала:</strong> <span id="eventStart"></span></p>
-        <p><strong>Дата и время окончания:</strong> <span id="eventEnd"></span></p>
-        <button id="closeModal" class="modal-close-btn">Закрыть</button>
+        <h2>Добавить новое событие</h2>
+        <form id="eventForm">
+            <label for="course">Курс:</label>
+            <select id="course" name="course">
+                {% for course in courses %}
+                    <option value="{{ course.id }}">{{ course.course_name }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="group">Группа:</label>
+            <select id="group" name="group">
+                {% for group in groups %}
+                    <option value="{{ group.id }}">{{ group.group_name }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="teacher">Преподаватель:</label>
+            <select id="teacher" name="teacher">
+                {% for teacher in teachers %}
+                    <option value="{{ teacher.teacher_id }}">{{ teacher.first_name }} {{ teacher.surname }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="startDate">Дата занятия:</label>
+            <input type="date" id="startDate" name="start_date">
+
+            <label for="startTime">Время начала:</label>
+            <input type="time" id="startTime" name="start_time" required>
+
+            <label for="endTime">Время окончания:</label>
+            <input type="time" id="endTime" name="end_time" required>
+
+            <button type="submit">Сохранить</button>
+        </form>
     </div>
 </div>
+
+<!-- Модальное окно для просмотра события -->
+<div id="viewEventModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Информация о событии</h2>
+
+        <div class="view-event-container">
+            <div class="view-event-label">Дата:</div>
+            <div class="view-event-value" id="viewDate"></div>
+
+            <div class="view-event-label">Время:</div>
+            <div class="view-event-value" id="viewTime"></div>
+
+            <div class="view-event-label">Курс:</div>
+            <div class="view-event-value" id="viewCourse"></div>
+
+            <div class="view-event-label">Группа:</div>
+            <div class="view-event-value" id="viewGroup"></div>
+
+            <div class="view-event-label">Преподаватель:</div>
+            <div class="view-event-value" id="viewTeacher"></div>
+            <label for="editLessonTopic"><strong>Тема урока:</strong></label>
+            <input type="text" id="editLessonTopic" placeholder="Введите тему урока">
+
+            <div class="save-button-container">
+                <button id="saveLessonTopic">Сохранить изменения</button>
+            </div>
+            
+
+        </div>
+    </div>
+</div>
+
+
 <style>
+    /* Основные стили для календаря */
     #calendar {
-        max-width: 100%; /* Ширина в процентах от родительского элемента */
-        height: calc(100vh - 160px); /* Высота в процентах от высоты окна */
+        max-width: 100%;
+        height: calc(100vh - 250px);
         margin: 0 auto;
-        background-color: #f9f9f9; /* Светло-серый фон */
-        border: 1px solid #ccc; /* Добавить границу вокруг календаря */
-        border-radius: 8px; /* Закругленные углы */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
-        padding: 20px; /* Внутренний отступ */
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
     }
-        /* Стили для модального окна */
-        .modal {
-        display: none; /* Скрыто по умолчанию */
+
+    /* Кнопка добавления */
+    #addEventButton {
+        background-color: #0044cc;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.1em;
+        transition: background-color 0.3s ease;
+    }
+    #addEventButton:hover {
+        background-color: #0033aa;
+    }
+
+    /* Контейнер кнопки */
+    .content-btn {
+        padding-bottom: 50px;
+        width: 100%;
+        margin: 0px auto;
+        background: #ffffff;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 10px;
+    }
+
+    .modal-content {
+        background-color: white;
+        position: absolute; /* Делаем позиционирование абсолютным */
+        top: 10%; /* Поднимаем окно выше */
+        left: 50%;
+        transform: translate(-50%, 0); /* Центрируем по горизонтали */
+        padding: 15px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px; /* Ограничиваем ширину */
+        max-height: 80vh; /* Ограничиваем высоту */
+        overflow-y: auto; /* Скролл появится только при необходимости */
+    }
+
+    /* Убираем скролл у всей страницы при открытии модального окна */
+    .modal {
+        display: none;
         position: fixed;
         z-index: 10;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* Темный фон */
-        overflow: auto; /* Для прокрутки при необходимости */
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: hidden; /* Запрещаем прокрутку всей страницы */
     }
 
-    .modal-content {
-        background-color: white;
-        margin: 15% auto;
-        padding: 20px;
-        border-radius: 8px;
-        width: 80%;
-        max-width: 500px;
-    }
 
     .close-btn {
         color: #aaa;
@@ -54,27 +159,140 @@
         position: absolute;
         top: 10px;
         right: 20px;
-    }
-
-    .close-btn:hover,
-    .close-btn:focus {
-        color: black;
-        text-decoration: none;
         cursor: pointer;
     }
+    .close-btn:hover {
+        color: black;
+    }
 
-    .modal-close-btn {
-        background-color: #4CAF50;
+    /* Стили для формы */
+    #eventForm label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+    #eventForm input, #eventForm select, #eventForm button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    #eventForm button {
+        background-color: #0044cc;
+        color: white;
+        font-size: 1em;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    #eventForm button:hover {
+        background-color: #0033aa;
+    }
+
+    #viewEventModal .modal-content {
+        background-color: white;
+        position: absolute;
+        top: 15%;
+        left: 50%;
+        transform: translate(-50%, 0);
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 70vh;
+        overflow-y: auto;
+        text-align: left;
+    }
+
+    /* Заголовок */
+    #viewEventModal h2 {
+        font-size: 20px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    /* Контейнер для двух столбцов */
+    .view-event-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Два столбца */
+        gap: 10px;
+        align-items: center;
+    }
+
+    /* Левый столбец с названиями */
+    .view-event-label {
+        font-weight: bold;
+        text-align: left; /* Выравниваем по правому краю */
+        padding-right: 10px;
+    }
+
+    /* Правый столбец с информацией */
+    .view-event-value {
+        text-align: left;
+    }
+
+    /* Кнопка закрытия */
+    #viewEventModal .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #aaa;
+    }
+
+    #viewEventModal .close-btn:hover {
+        color: black;
+    }
+
+    /* Фон модального окна */
+    #viewEventModal {
+        display: none;
+        position: fixed;
+        z-index: 10;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+
+        /* Стили для поля ввода темы урока */
+    #editLessonTopic {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Контейнер для кнопки */
+    .save-button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    /* Стили для кнопки "Сохранить изменения" */
+    #saveLessonTopic {
+        background-color: #0044cc;
         color: white;
         padding: 10px 20px;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
     }
 
-    .modal-close-btn:hover {
-        background-color: #45a049;
+    #saveLessonTopic:hover {
+        background-color: #0033aa;
     }
+
+
 </style>
 
 <!-- FullCalendar -->
@@ -86,56 +304,160 @@
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         var modal = document.getElementById('eventModal');
-        var closeModalButton = document.getElementById('closeModal');
-        var closeBtn = document.getElementsByClassName('close-btn')[0];
+        var closeModalButton = document.querySelector('.close-btn');
+        var addEventButton = document.getElementById('addEventButton');
+        var eventForm = document.getElementById('eventForm');
 
-        // Открытие модального окна
-        var openModal = function(event) {
-            document.getElementById('eventTitle').innerText = event.title || 'Без названия';
-            document.getElementById('eventStart').innerText = event.start.toLocaleString();
-            document.getElementById('eventEnd').innerText = event.end ? event.end.toLocaleString() : 'Не указано';
+        var closeModalButton = document.querySelector('#eventModal .close-btn');
+        var closeViewModalButton = document.querySelector('#viewEventModal .close-btn');
 
-            // Показ модального окна
+        // Открытие модального окна для просмотра события
+        function openViewModal(event) {
+            document.getElementById('viewCourse').textContent = event.title || 'Не указано';
+            document.getElementById('viewGroup').textContent = event.extendedProps?.group_name || 'Не указано';
+            document.getElementById('viewTeacher').textContent = event.extendedProps?.teacher_name || 'Не указано';
+            document.getElementById('viewDate').textContent = event.start ? event.start.toLocaleDateString() : 'Не указано';
+            document.getElementById('viewTime').textContent = event.start && event.end 
+                ? event.start.toLocaleTimeString() + ' - ' + event.end.toLocaleTimeString()
+                : 'Не указано';
+            // Отображаем текущую тему
+            document.getElementById('editLessonTopic').value = event.extendedProps.lesson_topic || '';
+
+            // Сохраняем ID события для отправки на сервер
+            document.getElementById('saveLessonTopic').setAttribute('data-event-id', event.id);
+
+            viewEventModal.style.display = 'block';
+        }
+
+
+        // Функции для открытия и закрытия модального окна
+        function openModal() {
             modal.style.display = 'block';
-        };
-
-        // Закрытие модального окна
-        var closeModal = function() {
+        }
+        function closeModal() {
             modal.style.display = 'none';
-        };
+        }
+        // Закрытие модального окна
+        function closeViewModal() {
+            viewEventModal.style.display = 'none';
+        }
 
-        // Закрытие при клике на кнопку
+        // Назначение обработчиков событий
         closeModalButton.addEventListener('click', closeModal);
-
-        // Закрытие при клике на крестик
-        closeBtn.addEventListener('click', closeModal);
-
-        // Закрытие при клике на темный фон (мимо модального окна)
+        addEventButton.addEventListener('click', openModal);
         window.addEventListener('click', function(event) {
             if (event.target === modal) {
                 closeModal();
             }
         });
 
+        // Обработчики событий для просмотра
+        closeViewModalButton.addEventListener('click', closeViewModal);
+        window.addEventListener('click', function(event) {
+            if (event.target === viewEventModal) {
+                closeViewModal();
+            }
+        });
+
+        // Инициализация календаря
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'timeGridWeek',
             locale: 'ru',
-            editable: false,
+            editable: false,  // Запрещает изменение событий
+            eventStartEditable: false,
             selectable: true,
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            events: '/get_events', // URL для получения событий
+            events: '/get_events',
+            allDaySlot: false,
+            slotMinTime: "08:00:00",
+            slotMaxTime: "20:00:00",
+            slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+            eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+            
             eventClick: function(info) {
-                var event = info.event;
-                openModal(event); // Открываем модальное окно
+                openViewModal(info.event);
             }
+
         });
 
         calendar.render();
-    });
 
+        // Отправка формы
+        eventForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var formData = new FormData(eventForm);
+
+            // Получаем значения полей формы
+            var startDate = formData.get('start_date');
+            var startTime = formData.get('start_time');
+            var endTime = formData.get('end_time');
+
+            console.log('Данные формы:', {
+                course_id: formData.get('course'),
+                group_id: formData.get('group'),
+                teacher_id: formData.get('teacher'),
+                start_time: startDate + 'T' + startTime,
+                end_time: startDate + 'T' + endTime
+            });
+            // Проверка на пустые или некорректные значения
+            if (!startDate || !startTime || !endTime) {
+                alert('Пожалуйста, заполните все поля: дата, время начала и время окончания.');
+                return;
+            }
+            var data = {
+                course_id: formData.get('course'),
+                group_id: formData.get('group'),
+                teacher_id: formData.get('teacher'),
+                start_time: startDate + 'T' + startTime,  // Формируем ISO строку для start_time
+                end_time: startDate + 'T' + endTime       // Формируем ISO строку для end_time    
+            };
+
+            fetch('/add_schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    calendar.refetchEvents();
+                    closeModal();
+                } else {
+                    alert('Ошибка при добавлении события');
+                }
+            });
+        });
+        document.getElementById('saveLessonTopic').addEventListener('click', function() {
+            var eventId = this.getAttribute('data-event-id');
+            var newLessonTopic = document.getElementById('editLessonTopic').value;
+
+            if (!newLessonTopic.trim()) {
+                alert('Пожалуйста, введите тему урока.');
+                return;
+            }
+
+            fetch('/update_lesson_topic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event_id: eventId, lesson_topic: newLessonTopic })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    calendar.refetchEvents(); // Обновляем события в календаре
+                    viewEventModal.style.display = 'none'; // Закрываем окно
+                } else {
+                    alert('Ошибка при обновлении темы');
+                }
+            });
+        });
+
+    });
 </script>
+
 {% endblock %}

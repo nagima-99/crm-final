@@ -99,19 +99,13 @@ class Schedule(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False) 
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)  
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.teacher_id'), nullable=False)
-    start_time = db.Column(db.DateTime, nullable=False) 
-    end_time = db.Column(db.DateTime, nullable=False)   
-    room = db.Column(db.String(50), nullable=True)  
+    
+    date = db.Column(db.Date, nullable=False)  # Дата занятия
+    start_time = db.Column(db.Time, nullable=False)  # Время начала
+    end_time = db.Column(db.Time, nullable=False)  # Время окончания
+    lesson_topic = db.Column(db.String, nullable=True)
 
     course = db.relationship('Course', backref='schedules')
     group = db.relationship('Group', backref='schedules')
     teacher = db.relationship('Teacher', backref='schedules')
-
-class Event(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(120), nullable=False)
-    start = db.Column(db.String(20), nullable=False)
-    end = db.Column(db.String(20), nullable=False)
-
-    def __repr__(self):
-        return f'<Event {self.title}>'
+    
