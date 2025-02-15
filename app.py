@@ -5,7 +5,7 @@ import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from forms import AdministratorForm, UpdateUserForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm
-from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, ManageTeacher, Schedule
+from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, Schedule, Attendance
 from functools import wraps
 import logging
 
@@ -624,47 +624,28 @@ def list_groups():
 @role_required('Администратор')
 def management():
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
-        # Получаем текущую страницу из запроса, по умолчанию 1
+    
+    # Получаем текущую страницу из запроса, по умолчанию 1
     page = request.args.get('page', 1, type=int)
     per_page = 9 # Количество учеников на одной странице
-
-    
     # Пагинация
     student_pagination = Student.query.paginate(page=page, per_page=per_page)
     students = student_pagination.items  # Ученики текущей страницы
 
     courses = Course.query.all()
-    groups = Group.query.all()
-    teachers = Teacher.query.all()
-    
+    groups = Group.query.all()    
 
     student_info = []
 
     for student in students:
         manage_student_entry = ManageStudent.query.filter_by(student_id=student.student_id).first()
-        course = None
-        group = None
-        teacher = None
-
-        if manage_student_entry:
-            # Получаем курс и группу
-            course = Course.query.get(manage_student_entry.course_id)
-            group = Group.query.get(manage_student_entry.group_id)
-
-            # Получаем преподавателя
-            manage_teacher = ManageTeacher.query.filter_by(
-                group_id=manage_student_entry.group_id,
-                course_id=manage_student_entry.course_id
-            ).first()
-
-            if manage_teacher:
-                teacher = Teacher.query.get(manage_teacher.teacher_id)
+        course = Course.query.get(manage_student_entry.course_id) if manage_student_entry else None
+        group = Group.query.get(manage_student_entry.group_id) if manage_student_entry else None
 
         student_info.append({
             'student': student,
             'course': course,
             'group': group,
-            'teacher': teacher
         })
 
     return render_template(
@@ -673,7 +654,6 @@ def management():
         student_info=student_info,
         courses=courses,
         groups=groups,
-        teachers=teachers,
         student_pagination=student_pagination
     )
 
@@ -685,27 +665,15 @@ def edit_management(id):
     student = Student.query.filter_by(student_id=id).first_or_404()
     courses = Course.query.all()
     groups = Group.query.all()
-    teachers = Teacher.query.all()
 
     # Получаем существующие данные о студенте
     manage_student = ManageStudent.query.filter_by(student_id=student.student_id).first()
     current_course_id = manage_student.course_id if manage_student else None
     current_group_id = manage_student.group_id if manage_student else None
 
-    # Находим преподавателя для этого студента
-    manage_teacher = None
-    current_teacher_id = None
-    if manage_student:
-        manage_teacher = ManageTeacher.query.filter_by(
-            group_id=manage_student.group_id,
-            course_id=manage_student.course_id
-        ).first()
-        current_teacher_id = manage_teacher.teacher_id if manage_teacher else None
-
     if request.method == 'POST':
         course_id = int(request.form.get('course_id'))
         group_id = int(request.form.get('group_id'))
-        teacher_id = int(request.form.get('teacher_id'))  # Получаем teacher_id из формы
 
         # Создаем или обновляем запись о студенте
         if not manage_student:
@@ -713,20 +681,6 @@ def edit_management(id):
         manage_student.course_id = course_id
         manage_student.group_id = group_id
         db.session.add(manage_student)
-
-        # Создаем или обновляем запись о преподавателе
-        if not manage_teacher:
-            manage_teacher = ManageTeacher(
-                teacher_id=teacher_id,  
-                group_id=group_id,
-                course_id=course_id
-            )
-        else:
-            manage_teacher.course_id = course_id
-            manage_teacher.group_id = group_id
-            manage_teacher.teacher_id = teacher_id
-
-        db.session.add(manage_teacher)
         db.session.commit()  # Сохраняем все изменения в базе данных
         flash('Изменения сохранены!')
         return redirect(url_for('management'))
@@ -737,10 +691,8 @@ def edit_management(id):
         student=student,
         courses=courses,
         groups=groups,
-        teachers=teachers,
         current_course_id=current_course_id,
         current_group_id=current_group_id,
-        current_teacher_id=current_teacher_id  # Передаем ID текущего преподавателя
     )
 
 
@@ -755,22 +707,33 @@ def schedule_management():
 
 @app.route('/get_events', methods=['GET'])
 def get_events():
-    events = Schedule.query.all()  # Извлекаем все события из базы
-    events_list = [
-        {
+    events = Schedule.query.all()
+    events_list = []
+
+    for event in events:
+        attendance_records = Attendance.query.filter_by(event_id=event.id).all()
+        
+        print(f"Event ID: {event.id}, Attendance Records: {attendance_records}")
+
+        attendance_list = [record.student_id for record in attendance_records]
+
+        event_data = {
             'id': event.id,
             'title': event.course.course_name if event.course else "Не указано",
-            'start': datetime.combine(event.date, event.start_time).isoformat(),
-            'end': datetime.combine(event.date, event.end_time).isoformat() if event.end_time else None,
+            'start': f"{event.date}T{event.start_time}",
+            'end': f"{event.date}T{event.end_time}" if event.end_time else None,
             'extendedProps': {
-                'group_name': event.group.group_name if event.group else "Не указано",  # Название группы
-                'teacher_name': f"{event.teacher.first_name} {event.teacher.surname}" if event.teacher else "Не указано",  # ФИО преподавателя
-                'lesson_topic': event.lesson_topic  # Добавляем тему!
+                'group_id': event.group.id if event.group else None,
+                'group_name': event.group.group_name if event.group else "Не указано",
+                'teacher_name': f"{event.teacher.first_name} {event.teacher.surname}" if event.teacher else "Не указано",
+                'lesson_topic': event.lesson_topic or "",
+                'attendance': attendance_list  
             }
         }
-        for event in events
-    ]
+        events_list.append(event_data)
+
     return jsonify(events_list)
+
 
 @app.route('/add_schedule', methods=['POST'])
 @login_required
@@ -778,11 +741,9 @@ def get_events():
 def add_schedule():
     data = request.get_json()
 
-    # Преобразуем start_time в дату и время
     start_datetime = datetime.fromisoformat(data['start_time'])
     end_datetime = datetime.fromisoformat(data['end_time'])
 
-    # Извлекаем дату и время
     date = start_datetime.date()  # Дата занятия
     start_time = start_datetime.time()  # Время начала
     end_time = end_datetime.time()  # Время окончания
@@ -791,7 +752,6 @@ def add_schedule():
     course_id = int(data['course_id'])
     teacher_id = int(data['teacher_id'])
 
-    # Создаем новое расписание
     new_schedule = Schedule(
         date=date,
         start_time=start_time,
@@ -806,19 +766,68 @@ def add_schedule():
 
     return jsonify({'success': True})
 
-@app.route('/update_lesson_topic', methods=['POST'])
-def update_lesson_topic():
-    data = request.json
+@app.route('/delete_event', methods=['POST'])
+@login_required
+@role_required('Администратор')
+def delete_event():
+    data = request.get_json()
     event_id = data.get('event_id')
-    new_topic = data.get('lesson_topic')
 
     event = Schedule.query.get(event_id)
     if event:
-        event.lesson_topic = new_topic
+        db.session.delete(event)
         db.session.commit()
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': 'Событие не найдено'})
+
+@app.route('/get_students', methods=['GET'])
+@login_required
+@role_required('Администратор')
+def get_students():
+    group_id = request.args.get('group_id')
+    print(f"Получен запрос с group_id: {group_id}")
+    if not group_id:
+        return jsonify({"error": "group_id is required"}), 400
+
+    students = db.session.query(Student).join(ManageStudent).filter(ManageStudent.group_id == group_id).all()
+
+    students_list = [
+        {"id": student.student_id, "full_name": f"{student.surname} {student.first_name}"}
+        for student in students
+    ]
+    
+    return jsonify(students_list)
+
+@app.route('/update_lesson_topic', methods=['POST'])
+@login_required
+@role_required('Администратор')
+def update_lesson_topic():
+    data = request.json
+    event_id = data.get('event_id')
+    lesson_topic = data.get('lesson_topic')
+    attendance_list = data.get('attendance', [])
+
+    if not event_id or not lesson_topic:
+        return jsonify({"error": "event_id и lesson_topic обязательны"}), 400
+
+    # Обновляем тему урока
+    schedule = Schedule.query.get(event_id)
+    if not schedule:
+        return jsonify({"error": "Событие не найдено"}), 404
+
+    schedule.lesson_topic = lesson_topic
+
+    # Удаляем старую посещаемость
+    Attendance.query.filter_by(event_id=event_id).delete()
+
+    # Добавляем новую посещаемость
+    for student_id in attendance_list:
+        attendance = Attendance(event_id=event_id, student_id=student_id, attended=True)
+        db.session.add(attendance)
+
+    db.session.commit()
+    return jsonify({"success": True})
 
 
 # Страница выхода

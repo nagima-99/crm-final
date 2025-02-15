@@ -28,18 +28,6 @@
             {% endfor %}
         </select>
 
-        <!-- Преподаватель -->
-        <label for="teacher_id">Преподаватель:</label>
-        <select name="teacher_id" id="teacher_id" required>
-            <option value="" disabled selected>Выберите преподавателя</option>
-            {% for teacher in teachers %}
-            <option value="{{ teacher.id }}" 
-                    {% if teacher.id == current_teacher_id %}selected{% endif %}>
-                {{ teacher.first_name }} {{ teacher.surname }}
-            </option>
-            {% endfor %}
-        </select>
-
         <button type="submit" class="add-btn">Сохранить изменения</button>
     </form>
 

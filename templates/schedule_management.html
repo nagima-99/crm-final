@@ -72,12 +72,17 @@
             <div class="view-event-value" id="viewTeacher"></div>
             <label for="editLessonTopic"><strong>Тема урока:</strong></label>
             <input type="text" id="editLessonTopic" placeholder="Введите тему урока">
+            <h3>Посещаемость</h3>
+            <div id="attendanceList"></div>
 
             <div class="save-button-container">
                 <button id="saveLessonTopic">Сохранить изменения</button>
             </div>
             
-
+            <div class="delete-button-container">
+                <button id="deleteEventButton">Удалить</button>
+            </div>
+            
         </div>
     </div>
 </div>
@@ -94,6 +99,9 @@
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         padding: 20px;
+    }
+    .fc-daygrid-day-number {
+        margin-bottom: 20px;
     }
 
     /* Кнопка добавления */
@@ -126,19 +134,18 @@
 
     .modal-content {
         background-color: white;
-        position: absolute; /* Делаем позиционирование абсолютным */
-        top: 10%; /* Поднимаем окно выше */
+        position: absolute; 
+        top: 10%; 
         left: 50%;
-        transform: translate(-50%, 0); /* Центрируем по горизонтали */
+        transform: translate(-50%, 0); 
         padding: 15px;
         border-radius: 8px;
         width: 90%;
-        max-width: 500px; /* Ограничиваем ширину */
-        max-height: 80vh; /* Ограничиваем высоту */
-        overflow-y: auto; /* Скролл появится только при необходимости */
+        max-width: 500px; 
+        max-height: 80vh; 
+        overflow-y: auto; 
     }
 
-    /* Убираем скролл у всей страницы при открытии модального окна */
     .modal {
         display: none;
         position: fixed;
@@ -148,7 +155,7 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
-        overflow: hidden; /* Запрещаем прокрутку всей страницы */
+        overflow: hidden;
     }
 
 
@@ -218,7 +225,7 @@
         gap: 10px;
         align-items: center;
     }
-
+    
     /* Левый столбец с названиями */
     .view-event-label {
         font-weight: bold;
@@ -292,6 +299,32 @@
         background-color: #0033aa;
     }
 
+    /* Контейнер для кнопки удаления */
+    .delete-button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    /* Стили для кнопки "Удалить" */
+    #deleteEventButton {
+        background-color: #cc0000;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    #deleteEventButton:hover {
+        background-color: #aa0000;
+    }
+    .fc-scrollgrid {
+        margin-top: -10px;
+    }
+        
 
 </style>
 
@@ -302,162 +335,212 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var modal = document.getElementById('eventModal');
-        var closeModalButton = document.querySelector('.close-btn');
-        var addEventButton = document.getElementById('addEventButton');
-        var eventForm = document.getElementById('eventForm');
+    var calendarEl = document.getElementById('calendar');
+    var modal = document.getElementById('eventModal');
+    var viewEventModal = document.getElementById('viewEventModal');
+    var closeModalButton = document.querySelector('#eventModal .close-btn');
+    var closeViewModalButton = document.querySelector('#viewEventModal .close-btn');
+    var addEventButton = document.getElementById('addEventButton');
+    var eventForm = document.getElementById('eventForm');
 
-        var closeModalButton = document.querySelector('#eventModal .close-btn');
-        var closeViewModalButton = document.querySelector('#viewEventModal .close-btn');
+    // Открытие модального окна просмотра события
+    function openViewModal(event) {
+        document.getElementById('viewCourse').textContent = event.title || 'Не указано';
+        document.getElementById('viewGroup').textContent = event.extendedProps?.group_name || 'Не указано';
+        document.getElementById('viewTeacher').textContent = event.extendedProps?.teacher_name || 'Не указано';
 
-        // Открытие модального окна для просмотра события
-        function openViewModal(event) {
-            document.getElementById('viewCourse').textContent = event.title || 'Не указано';
-            document.getElementById('viewGroup').textContent = event.extendedProps?.group_name || 'Не указано';
-            document.getElementById('viewTeacher').textContent = event.extendedProps?.teacher_name || 'Не указано';
-            document.getElementById('viewDate').textContent = event.start ? event.start.toLocaleDateString() : 'Не указано';
-            document.getElementById('viewTime').textContent = event.start && event.end 
-                ? event.start.toLocaleTimeString() + ' - ' + event.end.toLocaleTimeString()
-                : 'Не указано';
-            // Отображаем текущую тему
-            document.getElementById('editLessonTopic').value = event.extendedProps.lesson_topic || '';
-
-            // Сохраняем ID события для отправки на сервер
-            document.getElementById('saveLessonTopic').setAttribute('data-event-id', event.id);
-
-            viewEventModal.style.display = 'block';
-        }
-
-
-        // Функции для открытия и закрытия модального окна
-        function openModal() {
-            modal.style.display = 'block';
-        }
-        function closeModal() {
-            modal.style.display = 'none';
-        }
-        // Закрытие модального окна
-        function closeViewModal() {
-            viewEventModal.style.display = 'none';
-        }
-
-        // Назначение обработчиков событий
-        closeModalButton.addEventListener('click', closeModal);
-        addEventButton.addEventListener('click', openModal);
-        window.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
-
-        // Обработчики событий для просмотра
-        closeViewModalButton.addEventListener('click', closeViewModal);
-        window.addEventListener('click', function(event) {
-            if (event.target === viewEventModal) {
-                closeViewModal();
-            }
-        });
-
-        // Инициализация календаря
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            locale: 'ru',
-            editable: false,  // Запрещает изменение событий
-            eventStartEditable: false,
-            selectable: true,
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            },
-            events: '/get_events',
-            allDaySlot: false,
-            slotMinTime: "08:00:00",
-            slotMaxTime: "20:00:00",
-            slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
-            eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        if (event.start && event.end) {
+            const startTime = event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            const endTime = event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            const duration = Math.round((event.end - event.start) / 60000); // вычисляем разницу в минутах
             
-            eventClick: function(info) {
-                openViewModal(info.event);
-            }
+            document.getElementById('viewTime').textContent = `${startTime} - ${endTime} (${duration} мин.)`;
+        } else {
+            document.getElementById('viewTime').textContent = 'Не указано';
+        }
 
-        });
+        document.getElementById('viewDate').textContent = event.start ? event.start.toLocaleDateString() : 'Не указано';
+        document.getElementById('editLessonTopic').value = event.extendedProps.lesson_topic || '';
+        loadStudents(event.extendedProps.group_id, event.extendedProps.attendance || []);
 
-        calendar.render();
+        document.getElementById('saveLessonTopic').setAttribute('data-event-id', event.id);
+        document.getElementById('deleteEventButton').setAttribute('data-event-id', event.id);
 
-        // Отправка формы
-        eventForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+        viewEventModal.style.display = 'block';
+    }
 
-            var formData = new FormData(eventForm);
 
-            // Получаем значения полей формы
-            var startDate = formData.get('start_date');
-            var startTime = formData.get('start_time');
-            var endTime = formData.get('end_time');
 
-            console.log('Данные формы:', {
-                course_id: formData.get('course'),
-                group_id: formData.get('group'),
-                teacher_id: formData.get('teacher'),
-                start_time: startDate + 'T' + startTime,
-                end_time: startDate + 'T' + endTime
-            });
-            // Проверка на пустые или некорректные значения
-            if (!startDate || !startTime || !endTime) {
-                alert('Пожалуйста, заполните все поля: дата, время начала и время окончания.');
-                return;
-            }
-            var data = {
-                course_id: formData.get('course'),
-                group_id: formData.get('group'),
-                teacher_id: formData.get('teacher'),
-                start_time: startDate + 'T' + startTime,  // Формируем ISO строку для start_time
-                end_time: startDate + 'T' + endTime       // Формируем ISO строку для end_time    
-            };
+    // Загрузка списка студентов группы
+    function loadStudents(groupId, attendance) {
+        if (!groupId) return; // Предотвращаем ошибку, если groupId отсутствует
 
-            fetch('/add_schedule', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
+        fetch(`/get_students?group_id=${groupId}`)
             .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    calendar.refetchEvents();
-                    closeModal();
-                } else {
-                    alert('Ошибка при добавлении события');
-                }
+            .then(students => {
+                var attendanceList = document.getElementById('attendanceList');
+                attendanceList.innerHTML = '';
+
+                students.forEach(student => {
+                    var checked = attendance.includes(student.id) ? 'checked' : '';
+                    var studentItem = `
+                        <div>
+                            <label>
+                                <input type="checkbox" class="attendance-checkbox" value="${student.id}" ${checked}>
+                                ${student.full_name}
+                            </label>
+                        </div>
+                    `;
+                    attendanceList.innerHTML += studentItem;
+                });
             });
-        });
-        document.getElementById('saveLessonTopic').addEventListener('click', function() {
-            var eventId = this.getAttribute('data-event-id');
-            var newLessonTopic = document.getElementById('editLessonTopic').value;
+    }
 
-            if (!newLessonTopic.trim()) {
-                alert('Пожалуйста, введите тему урока.');
-                return;
-            }
+    // Функции открытия/закрытия модальных окон
+    function openModal() {
+        modal.style.display = 'block';
+    }
 
-            fetch('/update_lesson_topic', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ event_id: eventId, lesson_topic: newLessonTopic })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    calendar.refetchEvents(); // Обновляем события в календаре
-                    viewEventModal.style.display = 'none'; // Закрываем окно
-                } else {
-                    alert('Ошибка при обновлении темы');
-                }
-            });
-        });
+    function closeModal() {
+        modal.style.display = 'none';
+    }
 
+    function closeViewModal() {
+        viewEventModal.style.display = 'none';
+    }
+
+    // Назначение обработчиков событий
+    closeModalButton.addEventListener('click', closeModal);
+    closeViewModalButton.addEventListener('click', closeViewModal);
+    addEventButton.addEventListener('click', openModal);
+
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) closeModal();
+        if (event.target === viewEventModal) closeViewModal();
     });
+
+    // Инициализация календаря
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        locale: 'ru',
+        editable: false,
+        eventStartEditable: false,
+        selectable: true,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: '/get_events',
+        allDaySlot: false,
+        slotMinTime: "08:00:00",
+        slotMaxTime: "20:00:00",
+        slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+
+        eventClick: function(info) {
+            openViewModal(info.event);
+        }
+    });
+
+    calendar.render();
+
+    // Обработка отправки формы добавления занятия
+    eventForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(eventForm);
+        var startDate = formData.get('start_date');
+        var startTime = formData.get('start_time');
+        var endTime = formData.get('end_time');
+
+        if (!startDate || !startTime || !endTime) {
+            alert('Заполните дату и время.');
+            return;
+        }
+
+        var data = {
+            course_id: formData.get('course'),
+            group_id: formData.get('group'),
+            teacher_id: formData.get('teacher'),
+            start_time: startDate + 'T' + startTime,
+            end_time: startDate + 'T' + endTime
+        };
+
+        fetch('/add_schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                calendar.refetchEvents();
+                closeModal();
+            } else {
+                alert('Ошибка при добавлении события');
+            }
+        });
+    });
+
+    // Обновление темы урока и посещаемости
+    document.getElementById('saveLessonTopic').addEventListener('click', function() {
+        var eventId = this.getAttribute('data-event-id');
+        var newLessonTopic = document.getElementById('editLessonTopic').value;
+        var checkedStudents = Array.from(document.querySelectorAll('.attendance-checkbox:checked'))
+                                .map(checkbox => checkbox.value);
+
+        if (!newLessonTopic.trim()) {
+            alert('Введите тему урока.');
+            return;
+        }
+
+        fetch('/update_lesson_topic', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_id: eventId, lesson_topic: newLessonTopic, attendance: checkedStudents })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                calendar.refetchEvents();
+                closeViewModal();
+            } else {
+                alert('Ошибка при обновлении темы');
+            }
+        });
+    });
+
+    // Удаление события
+    document.getElementById('deleteEventButton').addEventListener('click', function() {
+        var eventId = this.getAttribute('data-event-id');
+
+        if (!eventId) {
+            alert('Ошибка: ID события отсутствует.');
+            return;
+        }
+
+        if (!confirm('Вы уверены, что хотите удалить это событие?')) {
+            return;
+        }
+
+        fetch('/delete_event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_id: eventId })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                calendar.refetchEvents();
+                closeViewModal();
+            } else {
+                alert('Ошибка при удалении события: ' + result.error);
+            }
+        });
+    });
+});
+
 </script>
 
 {% endblock %}

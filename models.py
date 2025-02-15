@@ -64,16 +64,12 @@ class Course(db.Model):
     course_name = db.Column(db.String(100), nullable=False)
     academic_hours = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)
-    teachers = db.relationship('ManageTeacher', back_populates='course')
     students = db.relationship('ManageStudent', back_populates='course')
-
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     group_name = db.Column(db.String(100), nullable=False)
     students = db.relationship('ManageStudent', back_populates='group')
-    teachers = db.relationship('ManageTeacher', back_populates='group')
-
 
 class ManageStudent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -84,15 +80,6 @@ class ManageStudent(db.Model):
     course = db.relationship('Course', back_populates='students')
     group = db.relationship('Group', back_populates='students')
 
-
-class ManageTeacher(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.teacher_id'))
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
-    teacher = db.relationship('Teacher', backref='assignments')
-    course = db.relationship('Course', back_populates='teachers')
-    group = db.relationship('Group', back_populates='teachers')
 
 class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -109,3 +96,11 @@ class Schedule(db.Model):
     group = db.relationship('Group', backref='schedules')
     teacher = db.relationship('Teacher', backref='schedules')
     
+class Attendance(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.student_id'), nullable=False)
+    attended = db.Column(db.Boolean, default=False)
+
+    event = db.relationship('Schedule', backref='attendances')
+    student = db.relationship('Student', backref='attendances')

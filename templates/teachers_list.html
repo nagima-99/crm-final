@@ -23,7 +23,6 @@
                 <th>Образование</th>
                 <th>Телефон</th>
                 <th>Электронная почта</th>
-                <th>Адрес</th>
                 <th>Удалить</th>
             </tr>
         </thead>
@@ -35,7 +34,6 @@
                 <td>{{ teacher.education }}</td>
                 <td>{{ teacher.phone }}</td>
                 <td>{{ teacher.user.email }}</td>
-                <td>{{ teacher.address }}</td>
                 <td>
                     <a class="btn-danger" href="{{ url_for('delete_teacher', id=teacher.id) }}"><i class="fa fa-trash"></i></a>
                 </td>
