@@ -10,16 +10,17 @@
     min-height: calc(100vh - 160px);
 }
 
-/* Стили для меток (label) */
+/* Метки */
 .form-container label {
     display: block;
-    margin: 15px 0 5px;
+    margin: 10px 0 5px;
     font-weight: bold;
     color: #333;
 }
 
-/* Стили для выпадающих списков (select) */
-.form-container select {
+/* Поля ввода и селекты */
+.form-container select, 
+.form-container input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
@@ -29,7 +30,7 @@
     background-color: #f9f9f9;
 }
 
-/* Стили для кнопки */
+/* Кнопка */
 .form-container button {
     padding: 10px 20px;
     background-color: #007bff;
@@ -42,7 +43,7 @@
     transition: background-color 0.3s ease;
     width: auto;
     display: block;
-    margin-top: 10px;
+    margin-top: 15px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -51,7 +52,7 @@
     background-color: #0056b3;
 }
 
-/* Стили для ссылки "Назад" */
+/* Ссылка "Назад" */
 .back-link {
     display: block;
     text-align: center;
@@ -65,29 +66,10 @@
     text-decoration: underline;
 }
 
-.manage-date {
-    margin-bottom: 20px; /* Отступ снизу для отделения от других элементов */
-}
-
-.manage-date label {
-    display: block; /* Метка будет отображаться как блочный элемент */
-    font-size: 14px;
+/* Стилизация цены */
+.course-price-text {
+    font-size: 1.2em;
     font-weight: bold;
-    color: #555; /* Цвет для текста метки */
-}
-
-/* Поле ввода даты и времени */
-.manage-date input[type="text"] {
-    width: 100%; /* Поле растягивается на всю ширину контейнера */
-    padding: 10px;
-    border: 1px solid #ccc; /* Цвет границы */
-    border-radius: 4px; /* Закругление углов */
-    font-size: 14px; /* Размер шрифта */
-    box-sizing: border-box; /* Для правильного расчета ширины с учетом отступов */
-    transition: border-color 0.3s ease; /* Плавное изменение цвета границы */
-}
-
-.manage-date input[type="text"]:focus {
-    border-color: #007bff; /* Цвет границы при фокусе */
-    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Легкое свечение при фокусе */
+    margin-top: 15px;
+    color: #555;
 }

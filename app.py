@@ -5,7 +5,7 @@ import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from forms import AdministratorForm, UpdateUserForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm
-from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, Schedule, Attendance
+from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, Schedule, Attendance, Payment
 from functools import wraps
 import logging
 
@@ -627,7 +627,7 @@ def management():
     
     # Получаем текущую страницу из запроса, по умолчанию 1
     page = request.args.get('page', 1, type=int)
-    per_page = 9 # Количество учеников на одной странице
+    per_page = 6 # Количество учеников на одной странице
     # Пагинация
     student_pagination = Student.query.paginate(page=page, per_page=per_page)
     students = student_pagination.items  # Ученики текущей страницы
@@ -642,10 +642,22 @@ def management():
         course = Course.query.get(manage_student_entry.course_id) if manage_student_entry else None
         group = Group.query.get(manage_student_entry.group_id) if manage_student_entry else None
 
+        # Считаем баланс
+        total_paid = db.session.query(db.func.sum(Payment.amount)).filter_by(student_id=student.student_id).scalar() or 0
+        total_attended = Attendance.query.filter_by(student_id=student.student_id, attended=True).count()
+        
+        price_per_lesson = (course.price / course.academic_hours) if course else 0
+        balance = total_paid - (total_attended * price_per_lesson)
+
+        # Определяем статус оплаты
+        payment_status = "Оплачено" if balance > 0 else "Не оплачено"
+
         student_info.append({
             'student': student,
             'course': course,
             'group': group,
+            'balance': balance,
+            'payment_status': payment_status
         })
 
     return render_template(
@@ -670,10 +682,23 @@ def edit_management(id):
     manage_student = ManageStudent.query.filter_by(student_id=student.student_id).first()
     current_course_id = manage_student.course_id if manage_student else None
     current_group_id = manage_student.group_id if manage_student else None
+    course_prices = {course.id: course.price for course in courses}
+
+    # Получаем курс ученика
+    course = Course.query.get(current_course_id) if current_course_id else None
+    price_per_lesson = (course.price / course.academic_hours) if course else 0
+
+    # Считаем баланс
+    total_paid = db.session.query(db.func.sum(Payment.amount)).filter_by(student_id=student.student_id).scalar() or 0
+    total_attended = Attendance.query.filter_by(student_id=student.student_id, attended=True).count()
+
+    balance = total_paid - (total_attended * price_per_lesson)
 
     if request.method == 'POST':
         course_id = int(request.form.get('course_id'))
         group_id = int(request.form.get('group_id'))
+        payment_method = request.form.get('payment_method')
+        amount = request.form.get('amount')
 
         # Создаем или обновляем запись о студенте
         if not manage_student:
@@ -681,6 +706,11 @@ def edit_management(id):
         manage_student.course_id = course_id
         manage_student.group_id = group_id
         db.session.add(manage_student)
+
+        if amount:
+            new_payment = Payment(student_id=student.student_id, amount=float(amount), method=payment_method)
+            db.session.add(new_payment)
+        
         db.session.commit()  # Сохраняем все изменения в базе данных
         flash('Изменения сохранены!')
         return redirect(url_for('management'))
@@ -693,6 +723,8 @@ def edit_management(id):
         groups=groups,
         current_course_id=current_course_id,
         current_group_id=current_group_id,
+        balance=balance,
+        course_prices=course_prices
     )
 
 

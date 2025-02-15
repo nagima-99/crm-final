@@ -104,3 +104,10 @@ class Attendance(db.Model):
 
     event = db.relationship('Schedule', backref='attendances')
     student = db.relationship('Student', backref='attendances')
+
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.student_id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    payment_date = db.Column(db.DateTime, default=datetime.now)
+    method = db.Column(db.String(50), nullable=False)  # "Наличные" или "Безналичные"

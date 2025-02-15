@@ -3,50 +3,70 @@
 {% block content %}
 <div class="form-container">
     <div class="management-form-container">
-    <form method="POST">
-        <!-- Курс -->
-        <label for="course_id">Курс:</label>
-        <select name="course_id" id="course_id" required>
-            <option value="" disabled selected>Выберите курс</option>
-            {% for course in courses %}
-            <option value="{{ course.id }}" 
-                    {% if course.id == current_course_id %}selected{% endif %}>
-                {{ course.course_name }}
-            </option>
-            {% endfor %}
-        </select>
+        <form method="POST">
+            <label for="course_id">Курс:</label>
+            <select name="course_id" id="course_id" required onchange="updatePrice()">
+                <option value="" disabled selected>Выберите курс</option>
+                {% for course in courses %}
+                <option value="{{ course.id }}" {% if course.id == current_course_id %}selected{% endif %}>
+                    {{ course.course_name }}
+                </option>
+                {% endfor %}
+            </select>
 
-        <!-- Группа -->
-        <label for="group_id">Группа:</label>
-        <select name="group_id" id="group_id" required>
-            <option value="" disabled selected>Выберите группу</option>
-            {% for group in groups %}
-            <option value="{{ group.id }}" 
-                    {% if group.id == current_group_id %}selected{% endif %}>
-                {{ group.group_name }}
-            </option>
-            {% endfor %}
-        </select>
+            <label for="group_id">Группа:</label>
+            <select name="group_id" id="group_id" required>
+                <option value="" disabled selected>Выберите группу</option>
+                {% for group in groups %}
+                <option value="{{ group.id }}" {% if group.id == current_group_id %}selected{% endif %}>
+                    {{ group.group_name }}
+                </option>
+                {% endfor %}
+            </select>
 
-        <button type="submit" class="add-btn">Сохранить изменения</button>
-    </form>
+            <p class="course-price-text">
+                Стоимость курса: <span id="course_price">
+                    {{ course_prices[current_course_id] if current_course_id else "Не выбрано" }}
+                </span> KZT
+            </p>
 
-    <a href="{{ url_for('management') }}" class="back-link">Назад</a>
+            <label>Баланс:</label>
+            <input type="text" value="{{ balance }} ₸" readonly>
+
+            <label>Добавить оплату (KZT):</label>
+            <input type="number" name="amount">
+
+            <label>Способ оплаты:</label>
+            <select name="payment_method">
+                <option value="Наличные">Наличные</option>
+                <option value="Безналичные">Безналичные</option>
+            </select>
+
+            <button type="submit" class="add-btn">Сохранить изменения</button>
+        </form>
+
+        <a href="{{ url_for('management') }}" class="back-link">Назад</a>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        flatpickr("#startDate", {
-            enableTime: true, // Включает выбор времени
-            dateFormat: "Y-m-d H:i", // Формат даты и времени
-            time_24hr: true, // 24-часовой формат
-        });
-        flatpickr("#endDate", {
-            enableTime: true, // Включает выбор времени
-            dateFormat: "Y-m-d H:i", // Формат даты и времени
-            time_24hr: true, // 24-часовой формат
-        });
+        var coursePrices = JSON.parse('{{ course_prices | tojson | safe }}');
+        
+        function updatePrice() {
+            var courseId = document.getElementById("course_id").value;
+            var priceField = document.getElementById("course_price");
+
+            if (coursePrices.hasOwnProperty(courseId)) {
+                priceField.innerText = coursePrices[courseId];
+            } else {
+                priceField.innerText = "Не выбрано";
+            }
+        }
+
+        document.getElementById("course_id").addEventListener("change", updatePrice);
+        updatePrice();
     });
 </script>
+
 {% endblock %}
