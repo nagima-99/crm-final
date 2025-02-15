@@ -31,7 +31,7 @@
             <label for="teacher">Преподаватель:</label>
             <select id="teacher" name="teacher">
                 {% for teacher in teachers %}
-                    <option value="{{ teacher.teacher_id }}">{{ teacher.first_name }} {{ teacher.surname }}</option>
+                    <option value="{{ teacher.teacher_id }}">{{ teacher.first_name }} {{ teacher.surname }} ({{ teacher.education }})</option>
                 {% endfor %}
             </select>
 
