@@ -36,6 +36,7 @@
               <li><a href="{{ url_for('list_groups') }}" class="nav-link {% if request.endpoint == 'list_groups' %}active{% endif %}">Группы</a></li>
               <li><a href="{{ url_for('management') }}" class="nav-link {% if request.endpoint == 'management' %}active{% endif %}">Управление учеником</a></li>
               <li><a href="{{ url_for('schedule_management') }}" class="nav-link {% if request.endpoint == 'schedule_management' %}active{% endif %}">Расписание</a></li>  
+              <li><a href="{{ url_for('chat') }}" class="nav-link {% if request.endpoint == 'chat' %}active{% endif %}">Чат</a></li>  
             </ul>
           </aside>
           

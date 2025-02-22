@@ -5,12 +5,23 @@ import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from forms import AdministratorForm, UpdateUserForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm
-from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, Schedule, Attendance, Payment
+from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, Schedule, Attendance, Payment, Message
 from functools import wraps
 import logging
+import pusher
+from sqlalchemy import or_, and_
 
 # Инициализация приложения
 app = Flask(__name__)
+
+# Инициализация Pusher
+pusher_client = pusher.Pusher(
+    app_id="1942827",
+    key="625c8111a341758cd1e0",
+    secret="7d1fb0e8b5fcbcb0acd1",
+    cluster="eu",
+    ssl=True
+)
 
 # Конфигурация базы данных
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -860,6 +871,115 @@ def update_lesson_topic():
 
     db.session.commit()
     return jsonify({"success": True})
+
+def get_chat_partners():
+    print(f"Текущий пользователь: {current_user.id}, роль: {current_user.role}")
+
+    if current_user.role == 'Администратор':
+        users = Users.query.filter(Users.role.in_(['Учитель', 'Студент'])).all()
+    elif current_user.role == 'Учитель':
+        users = Users.query.filter_by(Users.role.in_(['Студент', 'Администратор'])).all() 
+    elif current_user.role == 'Студент':
+        users = Users.query.filter(Users.role.in_(['Учитель', 'Администратор'])).all()
+    else:
+        users = []
+
+    print(f"Найдено пользователей: {len(users)}")
+    return users
+
+def get_full_name(user):
+    if user.role == 'Администратор':
+        admin = Administrator.query.filter_by(admin_id=user.id).first()
+        return f"{admin.surname} {admin.first_name}" if admin else "Администратор"
+
+    elif user.role == 'Учитель':
+        teacher = Teacher.query.filter_by(teacher_id=user.id).first()
+        return f"{teacher.surname} {teacher.first_name}" if teacher else "Учитель"
+
+    elif user.role == 'Студент':
+        student = Student.query.filter_by(student_id=user.id).first()
+        return f"{student.surname} {student.first_name}" if student else "Студент"
+
+    return "Неизвестный пользователь"
+
+
+@app.route('/chat')
+@login_required
+@role_required('Администратор')
+def chat():
+    administrator = Users.query.filter_by(id=current_user.id).first() 
+    chat_partners = get_chat_partners()  
+    
+    print(f"Найдено пользователей: {len(chat_partners)}")
+    for user in chat_partners:
+        print(f"ID: {user.id}, Email: {user.email}, Role: {user.role}") 
+    
+    users = [
+        {
+            "id": user.id,
+            "full_name": get_full_name(user), 
+            "photo": user.photo or "/static/uploads/default.png",
+            "role": user.role 
+        }
+        for user in chat_partners
+    ]
+    return render_template('chat.html', users=users, administrator=administrator)
+
+
+@app.route('/send_message', methods=['POST'])
+@login_required
+def send_message():
+    try:
+        data = request.json
+        recipient_id = data.get('recipient_id')
+        message_text = data.get('message')
+        
+        if not recipient_id or not message_text:
+            return jsonify({'error': 'Неверные данные'}), 400
+
+        # Сохраняем сообщение в базе данных
+        message = Message(sender_id=current_user.id, recipient_id=recipient_id, message=message_text)
+        db.session.add(message)
+        db.session.commit()
+        
+        # Отправляем пуш-уведомление с новым сообщением
+        pusher_client.trigger(f'chat_{recipient_id}', 'new_message', {
+            'sender': current_user.username,
+            'message': message_text
+        })
+        
+        return jsonify({'status': 'Message sent'})
+    
+    except Exception as e:
+        # Логирование ошибки
+        print(f"Ошибка при отправке сообщения: {e}")
+        return jsonify({'error': 'Произошла ошибка при отправке сообщения.'}), 500
+
+
+@app.route('/get_messages/<int:recipient_id>', methods=['GET'])
+@login_required
+def get_messages(recipient_id):
+    try:
+        # Получаем все сообщения между текущим пользователем и получателем
+        messages = Message.query.filter(
+            ((Message.sender_id == current_user.id) & (Message.recipient_id == recipient_id)) |
+            ((Message.sender_id == recipient_id) & (Message.recipient_id == current_user.id))
+        ).order_by(Message.timestamp.asc()).all()
+        
+        # Получаем пользователей для сообщений заранее, чтобы избежать повторных запросов к базе данных
+        users_dict = {user.id: get_full_name(user) for user in Users.query.all()}
+        
+        # Формируем ответ с данными сообщений
+        return jsonify([{
+            'sender': users_dict[msg.sender_id],  # Получаем имя отправителя из заранее подготовленного словаря
+            'message': msg.message,
+            'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        } for msg in messages])
+
+    except Exception as e:
+        # Логирование ошибки
+        print(f"Ошибка при загрузке сообщений: {e}")
+        return jsonify({'error': 'Произошла ошибка при загрузке сообщений.'}), 500
 
 
 # Страница выхода

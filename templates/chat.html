@@ -1,0 +1,343 @@
+{% extends "base_administrator.html" %}
+
+{% block title %}Чат{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Боковая панель с пользователями -->
+    <div class="chat-sidebar">
+        <h3>Выберите категорию</h3>
+        <select id="user-filter">
+            <option value="all">Все</option>
+            <option value="teacher">Учителя</option>
+            <option value="student">Студенты</option>
+        </select>
+
+        <h3>Список пользователей</h3>
+        <ul id="user-list">
+            {% for user in users %}
+            <li class="user-item" data-role="{% if user.role == 'Учитель' %}teacher{% elif user.role == 'Студент' %}student{% else %}admin{% endif %}">
+                    <a href="#" class="chat-user" 
+                       data-user-id="{{ user.id }}" 
+                       data-role="{% if user.role == 'Учитель' %}teacher{% elif user.role == 'Студент' %}student{% else %}admin{% endif %}" 
+                       data-name="{{ user.full_name }}" 
+                       data-avatar="{{ user.photo or '/static/uploads/default.png' }}">
+                        <img src="{{ user.photo or '/static/default-avatar.png' }}" alt="Аватар" class="user-avatar">
+                        {{ user.full_name }} ({{ user.role }})
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Основной чат -->
+    <div class="chat-box" data-current-user-id="{{ current_user.id }}">
+        <div class="chat-header">
+            <img id="chat-avatar" src="/static/uploads/default.png" alt="Аватар" class="chat-avatar">
+            <h3 id="chat-user-name">Выберите пользователя</h3>
+        </div>
+        <div id="chat-messages" class="messages">
+            <p>Выберите пользователя для начала чата</p>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Введите сообщение...">
+            <button id="send-message">Отправить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Подключение Pusher -->
+<script src="https://js.pusher.com/8.2/pusher.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentChatUserId = null;
+    
+    // Фильтр пользователей
+    document.getElementById('user-filter').addEventListener('change', function() {
+        let filter = this.value;
+        document.querySelectorAll('.user-item').forEach(item => {
+            item.style.display = (filter === 'all' || item.getAttribute('data-role') === filter) ? 'block' : 'none';
+        });
+    });
+
+    // Динамическая обработка кликов по пользователям
+    document.getElementById('user-list').addEventListener('click', function(event) {
+        let userElement = event.target.closest('.chat-user');
+        if (!userElement) return;
+
+        event.preventDefault();
+        currentChatUserId = userElement.getAttribute('data-user-id');
+        let userName = userElement.getAttribute('data-name');
+        let userRole = userElement.getAttribute('data-role');
+        let userAvatar = userElement.getAttribute('data-avatar') || '/static/uploads/default.png';
+        let roleMap = {
+            "teacher": "Учитель",
+            "student": "Студент",
+            "admin": "Администратор"
+        };
+        document.getElementById('chat-user-name').textContent = `${userName} (${roleMap[userRole] || userRole})`;
+        document.getElementById('chat-avatar').src = userAvatar;
+
+        loadMessages(currentChatUserId);
+    });
+
+    // Отправка сообщения по кнопке
+    document.getElementById('send-message').addEventListener('click', function() {
+        sendMessage();
+    });
+
+    // Отправка сообщения клавишей Enter
+    document.getElementById('message-input').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+
+    function loadMessages(userId) {
+    fetch(`/get_messages/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data); // Печать данных в консоль
+            let chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = "";
+            if (data && data.length > 0) {
+                data.forEach(msg => {
+                    chatMessages.innerHTML += `<p><strong>${msg.sender}:</strong> ${msg.message} <small>${msg.timestamp}</small></p>`;
+                });
+            } else {
+                chatMessages.innerHTML = "<p>Нет сообщений.</p>";
+            }
+        })
+        .catch(error => {
+            console.error("Ошибка при загрузке сообщений:", error);
+        });
+}
+
+    function sendMessage() {
+        let messageInput = document.getElementById('message-input');
+        let message = messageInput.value.trim();
+        if (!message || !currentChatUserId) return;
+
+        fetch('/send_message', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({recipient_id: currentChatUserId, message: message})
+        }).then(response => response.json())
+          .then(() => {
+              messageInput.value = "";
+              loadMessages(currentChatUserId);
+          });
+    }
+
+    // Pusher для автообновления чата
+    const pusher = new Pusher("625c8111a341758cd1e0", {
+        cluster: "eu",
+        encrypted: true
+    });
+
+    const channel = pusher.subscribe(`chat_{{ current_user.id }}`);
+
+    channel.bind('new_message', function(data) {
+        if (data.sender_id == currentChatUserId) {
+            loadMessages(currentChatUserId);
+        }
+    });
+});
+</script>
+
+<style>
+/* Контейнер чата */
+.chat-container {
+    position: relative;
+    width: 100%;
+    margin: 0px auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    min-height: calc(100vh - 160px);
+    display: flex;
+    gap: 15px;
+}
+
+/* Боковая панель (список пользователей) */
+.chat-sidebar {
+    width: 30%;
+    background: #f9fafb;
+    border-right: 1px solid #e0e0e0;
+    padding: 15px;
+    border-radius: 10px;
+    max-height: 650px;
+    overflow-y: auto;
+    box-shadow: inset 0 0 5px rgba(182, 76, 76, 0.05);
+}
+
+.chat-sidebar h3 {
+    margin-bottom: 12px;
+    font-size: 16px;
+    color: #444;
+    font-weight: 600;
+}
+
+.chat-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-sidebar::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.chat-sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Фильтр */
+#user-filter {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* Список пользователей */
+#user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-item {
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.user-item:hover {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+/* Ссылки (пользователи) */
+.chat-user {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.chat-user:hover {
+    background: #007bff;
+    color: white;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+}
+
+/* Основной чат */
+.chat-box {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Заголовок чата */
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    gap: 15px;
+    border-radius: 8px;
+}
+
+.chat-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid white;
+    background: #f8f9fa;
+}
+
+/* Окно сообщений */
+#chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    max-height: 450px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+#chat-messages p {
+    background: #eef1f5;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    width: fit-content;
+    max-width: 75%;
+    font-size: 14px;
+}
+
+#chat-messages p:nth-child(odd) {
+    background: #d6eaff;
+}
+
+/* Поле ввода и кнопка */
+.chat-input {
+    display: flex;
+    padding: 12px;
+    background: #ffffff;
+    border-top: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    background: #f8f9fa;
+}
+
+.chat-input button {
+    padding: 12px 16px;
+    background: #007bff;
+    border: none;
+    color: white;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-left: 10px;
+}
+
+.chat-input button:hover {
+    background: #0056b3;
+}
+
+</style>
+{% endblock %}
