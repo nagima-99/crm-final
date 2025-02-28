@@ -5,11 +5,12 @@ import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from forms import AdministratorForm, UpdateUserForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm
-from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, Schedule, Attendance, Payment, Message
+from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, Schedule, Attendance, Payment, Message, Salary
 from functools import wraps
 import logging
 import pusher
-from sqlalchemy import or_, and_
+from sqlalchemy import func
+
 
 # Инициализация приложения
 app = Flask(__name__)
@@ -446,37 +447,23 @@ def register_teacher():
     return render_template('register_teacher.html', form=form, administrator=administrator)
 
 
-# Добавить новый курс
-@app.route('/add_course', methods=['GET', 'POST'])
-@login_required
-@role_required('Администратор')
+@app.route('/add_course', methods=['POST'])
 def add_course():
-    form = CourseForm()
-    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
-    if form.validate_on_submit():
-        try:
-            # Проверка на уникальность названия курса
-            existing_course = Course.query.filter_by(course_name=form.course_name.data).first()
-            if existing_course:
-                # Если курс с таким именем уже существует, отобразить сообщение об ошибке
-                flash("Курс с таким названием уже существует. Пожалуйста, выберите другое название.", "danger")
-            else:
-                course = Course(course_name=form.course_name.data, 
-                                academic_hours=form.academic_hours.data,
-                                price=form.price.data)
-                db.session.add(course)
-                db.session.commit()
-                flash("Курс успешно добавлен!", "success")
-                return redirect(url_for('list_courses'))
-        except Exception as e:
-            db.session.rollback()
-            flash("Произошла ошибка при добавлении курса. Повторите попытку.", "danger")
-        # Обработка ошибок формы (если есть)
-    if form.errors:
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(f"{form[field].label.text}: {error}", "danger")
-    return render_template('add_course.html', form=form, administrator=administrator)
+    data = request.get_json()
+    course_name = data.get('course_name')
+
+    # Пример проверки на существование курса
+    existing_course = Course.query.filter_by(course_name=course_name).first()
+    if existing_course:
+        return jsonify({"success": False, "message": "Курс уже существует"})
+    
+    # Если курс не существует, сохраняем его
+    new_course = Course(course_name=course_name, academic_hours=data['academic_hours'], price=data['price'])
+    db.session.add(new_course)
+    db.session.commit()
+
+    flash("Курс успешно добавлен!", "success")
+    return jsonify({"success": True, "message": "Курс успешно добавлен"})
 
 # Редактировать курс
 @app.route('/edit_course/<int:id>', methods=['GET', 'POST'])
@@ -487,7 +474,7 @@ def edit_course(id):
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     # Получаем курс из базы данных
     course = Course.query.get_or_404(id)
-    # Заполняем форму данными из курса
+    # Заполняем форму данными из курса 
     form = CourseForm(obj=course)
 
     if form.validate_on_submit():
@@ -547,7 +534,7 @@ def list_courses():
 
 
 # Добавить новую группу
-@app.route('/add_group', methods=['GET', 'POST'])
+@app.route('/add_group', methods=['POST'])
 @login_required
 @role_required('Администратор')
 def add_group():
@@ -558,22 +545,20 @@ def add_group():
         try:
             existing_group = Group.query.filter_by(group_name=form.group_name.data).first()
             if existing_group:
-                flash("Группа с таким названием уже существует. Пожалуйста, выберите другое название.", "danger")
+                return jsonify({"success": False, "message": "Группа уже существует"})
             else:
                 group = Group(group_name=form.group_name.data)  
                 db.session.add(group)
                 db.session.commit()
                 flash("Группа успешно добавлена!", "success")
-                return redirect(url_for('list_groups'))
+                return jsonify({"success": True, "message": "Группа успешно добавлена"})
         except Exception as e:
             db.session.rollback()
             flash("Произошла ошибка при добавлении группы. Повторите попытку.", "danger")
-        # Обработка ошибок формы (если есть)
-    if form.errors:
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(f"{form[field].label.text}: {error}", "danger")
-    return render_template('add_group.html', form=form, administrator=administrator)
+            return jsonify({"success": False, "message": "Произошла ошибка"})
+    # Обработка ошибок формы (если есть)
+    return jsonify({"success": False, "message": "Ошибка валидации формы"})
+
 
 # Редактировать группу
 @app.route('/edit_group/<int:id>', methods=['GET', 'POST'])
@@ -615,12 +600,30 @@ def delete_group(id):
     return redirect(url_for('list_groups'))
 
 # Просмотр всех групп
-@app.route('/groups', methods=['GET'])
+@app.route('/groups', methods=['GET', 'POST'])
 @login_required
 @role_required('Администратор')
 def list_groups():
+    form = GroupForm()  # Пример формы, которую нужно создать
+
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     groups = Group.query.all()
+
+    if form.validate_on_submit():
+        # Если форма отправлена и прошла валидацию, добавляем новую группу
+        group_name = form.group_name.data
+        existing_group = Group.query.filter_by(group_name=group_name).first()
+
+        if existing_group:
+            flash("Группа с таким названием уже существует!", "danger")
+        else:
+            new_group = Group(group_name=group_name)
+            db.session.add(new_group)
+            db.session.commit()
+            flash("Группа успешно добавлена!", "success")
+
+        return redirect(url_for('list_groups'))
+
     # Получаем текущую страницу из запроса, по умолчанию 1
     page = request.args.get('page', 1, type=int)
     per_page = 8 
@@ -628,7 +631,8 @@ def list_groups():
     # Пагинация
     pagination = Group.query.paginate(page=page, per_page=per_page)
     groups = pagination.items 
-    return render_template('groups.html', groups=groups, administrator=administrator, pagination=pagination)
+
+    return render_template('groups.html', form=form, groups=groups, administrator=administrator, pagination=pagination)
 
 @app.route('/management', methods=['GET'])
 @login_required
@@ -782,32 +786,37 @@ def get_events():
 @login_required
 @role_required('Администратор')
 def add_schedule():
-    data = request.get_json()
+    try:
+        data = request.get_json()
+        print("Полученные данные:", data)  # Лог
 
-    start_datetime = datetime.fromisoformat(data['start_time'])
-    end_datetime = datetime.fromisoformat(data['end_time'])
+        start_datetime = datetime.fromisoformat(data['start_time'])
+        end_datetime = datetime.fromisoformat(data['end_time'])
 
-    date = start_datetime.date()  # Дата занятия
-    start_time = start_datetime.time()  # Время начала
-    end_time = end_datetime.time()  # Время окончания
+        date = start_datetime.date()
+        start_time = start_datetime.time()
+        end_time = end_datetime.time()
 
-    group_id = int(data['group_id'])
-    course_id = int(data['course_id'])
-    teacher_id = int(data['teacher_id'])
+        group_id = int(data['group_id'])
+        course_id = int(data['course_id'])
+        teacher_id = int(data['teacher_id'])
 
-    new_schedule = Schedule(
-        date=date,
-        start_time=start_time,
-        end_time=end_time,
-        group_id=group_id,
-        course_id=course_id,
-        teacher_id=teacher_id
-    )
+        new_schedule = Schedule(
+            date=date,
+            start_time=start_time,
+            end_time=end_time,
+            group_id=group_id,
+            course_id=course_id,
+            teacher_id=teacher_id
+        )
 
-    db.session.add(new_schedule)
-    db.session.commit()
+        db.session.add(new_schedule)
+        db.session.commit()
 
-    return jsonify({'success': True})
+        return jsonify({'success': True})
+    except Exception as e:
+        print("Ошибка при добавлении расписания:", e)
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/delete_event', methods=['POST'])
 @login_required
@@ -817,12 +826,25 @@ def delete_event():
     event_id = data.get('event_id')
 
     event = Schedule.query.get(event_id)
-    if event:
+    if not event:
+        return jsonify({'success': False, 'error': 'Событие не найдено'})
+
+    teacher_id = event.teacher_id
+    course_id = event.course_id
+    group_id = event.group_id
+    duration_hours = (datetime.combine(event.date, event.end_time) - datetime.combine(event.date, event.start_time)).seconds / 3600
+
+    try:
         db.session.delete(event)
         db.session.commit()
+
+        # Вычитаем часы из зарплаты
+        update_teacher_salary(teacher_id, -duration_hours, course_id, group_id)
+
         return jsonify({'success': True})
-    else:
-        return jsonify({'success': False, 'error': 'Событие не найдено'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/get_students', methods=['GET'])
 @login_required
@@ -854,14 +876,17 @@ def update_lesson_topic():
     if not event_id or not lesson_topic:
         return jsonify({"error": "event_id и lesson_topic обязательны"}), 400
 
-    # Обновляем тему урока
+    # Находим событие в расписании
     schedule = Schedule.query.get(event_id)
     if not schedule:
         return jsonify({"error": "Событие не найдено"}), 404
 
     schedule.lesson_topic = lesson_topic
 
-    # Удаляем старую посещаемость
+    # Проверяем, был ли этот урок уже учтён в зарплате
+    existing_attendance = Attendance.query.filter_by(event_id=event_id).count()
+
+    # Удаляем старую посещаемость (заменяем полностью)
     Attendance.query.filter_by(event_id=event_id).delete()
 
     # Добавляем новую посещаемость
@@ -869,8 +894,14 @@ def update_lesson_topic():
         attendance = Attendance(event_id=event_id, student_id=student_id, attended=True)
         db.session.add(attendance)
 
+    # Начисляем зарплату ТОЛЬКО ЕСЛИ ранее посещаемости не было (т.е. это ПЕРВОЕ сохранение)
+    if existing_attendance == 0 and attendance_list:
+        duration_hours = (datetime.combine(schedule.date, schedule.end_time) - datetime.combine(schedule.date, schedule.start_time)).total_seconds() / 3600
+        update_teacher_salary(schedule.teacher_id, duration_hours, schedule.course_id, schedule.group_id)
+
     db.session.commit()
     return jsonify({"success": True})
+
 
 def get_chat_partners():
     print(f"Текущий пользователь: {current_user.id}, роль: {current_user.role}")
@@ -980,6 +1011,192 @@ def get_messages(recipient_id):
         # Логирование ошибки
         print(f"Ошибка при загрузке сообщений: {e}")
         return jsonify({'error': 'Произошла ошибка при загрузке сообщений.'}), 500
+
+# Функция для обновления или создания записи о зарплате учителя
+def update_teacher_salary(teacher_id, hours, course_id, group_id):
+    current_month = datetime.now().strftime('%Y-%m')
+
+    print(f"Обновление зарплаты: Teacher ID: {teacher_id}, Course ID: {course_id}, Group ID: {group_id}, Hours: {hours}")
+
+    salary = Salary.query.filter_by(
+        teacher_id=teacher_id,
+        course_id=course_id,
+        group_id=group_id,
+        month=current_month,
+        status='Ожидает оплаты'
+    ).first()
+
+    if salary:
+        salary.total_hours += hours
+        if salary.total_hours <= 0:
+            db.session.delete(salary)  # Удаляем запись, если часов не осталось
+        else:
+            salary.total_salary = salary.total_hours * salary.hourly_rate  # Пересчет суммы
+    else:
+        if hours > 0:  # Добавляем новую запись, только если есть положительные часы
+            last_salary = Salary.query.filter_by(teacher_id=teacher_id).order_by(Salary.month.desc()).first()
+            last_hourly_rate = last_salary.hourly_rate if last_salary else 1500
+
+            salary = Salary(
+                teacher_id=teacher_id,
+                course_id=course_id,
+                group_id=group_id,
+                month=current_month,
+                total_hours=hours,
+                hourly_rate=last_hourly_rate,
+                total_salary=hours * last_hourly_rate,
+                status='Ожидает оплаты'
+            )
+            db.session.add(salary)
+
+    db.session.commit()
+
+
+
+# Функция для обработки выплаты зарплаты
+def pay_teacher_salary(salary_id):
+    salary = Salary.query.get(salary_id)
+    if salary and salary.status == 'Ожидает оплаты':
+        salary.status = 'Оплачено'
+        salary.payment_date = datetime.now().date()
+        db.session.commit()
+
+# Пример вызова при добавлении записи в расписание
+def on_schedule_added(teacher_id, course_id, group_id, date, start_time, end_time):
+    # Подсчет часов
+    print(f"Добавление занятия: {teacher_id}, {course_id}, {group_id}, {date}, {start_time}, {end_time}")
+
+    duration = (datetime.combine(date, end_time) - datetime.combine(date, start_time)).seconds / 3600
+    
+    # Проверяем, есть ли уже такая запись
+    existing_schedule = Schedule.query.filter_by(teacher_id=teacher_id, course_id=course_id, group_id=group_id, date=date, start_time=start_time, end_time=end_time).first()
+    
+    if not existing_schedule:
+        # Создаем запись в расписании, если ее нет
+        new_schedule = Schedule(
+            teacher_id=teacher_id,
+            course_id=course_id,
+            group_id=group_id,
+            date=date,
+            start_time=start_time,
+            end_time=end_time
+        )
+        db.session.add(new_schedule)
+        db.session.commit()
+    
+    # Обновляем зарплату учителя
+    update_teacher_salary(teacher_id, duration)
+
+
+# Обновление ставки за час
+@app.route('/update_hourly_rate', methods=['POST'])
+def update_hourly_rate():
+    data = request.json
+    salary_id = data.get('salary_id')
+    new_rate = data.get('new_rate')
+
+    salary = Salary.query.get(salary_id)
+    if salary:
+        salary.hourly_rate = float(new_rate)
+        salary.update_salary()  # Пересчет зарплаты
+        db.session.commit()
+        return jsonify({"success": True})
+    
+    return jsonify({"success": False, "error": "Запись не найдена"}), 404
+
+
+@app.route('/pay_salary', methods=['POST'])
+def pay_salary():
+    data = request.json
+    salary_id = data.get('salary_id')
+    print(f"Полученный salary_id: {salary_id}")  # Логируем ID
+
+    salary = Salary.query.get(salary_id)
+    if salary:
+        print(f"Найдена зарплата {salary.id}, статус: {salary.status}")  # Лог
+
+    if salary and salary.status == 'Ожидает оплаты':
+        salary.status = 'Оплачено'
+        salary.payment_date = datetime.now().date()
+        db.session.commit()
+        print(f"Зарплата {salary.id} обновлена: {salary.status}, {salary.payment_date}")  # Лог
+        return jsonify({"success": True})
+
+    print("Ошибка оплаты!")  # Лог ошибки
+    return jsonify({"success": False, "error": "Не удалось оплатить"}), 400
+
+# Словарь для перевода месяцев на русский
+MONTHS_RU = {
+    "January": "Январь", "February": "Февраль", "March": "Март",
+    "April": "Апрель", "May": "Май", "June": "Июнь",
+    "July": "Июль", "August": "Август", "September": "Сентябрь",
+    "October": "Октябрь", "November": "Ноябрь", "December": "Декабрь"
+}
+
+@app.route('/salary_management')
+@login_required
+@role_required('Администратор')
+def salary_management():
+    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
+    
+    # Получаем текущую страницу из запроса, по умолчанию 1
+    page = request.args.get('page', 1, type=int)
+    per_page = 3
+
+    # Запрос данных
+    salaries_pagination = (
+        db.session.query(
+            Teacher.id.label("teacher_id"),
+            Teacher.surname,
+            Teacher.first_name,
+            Teacher.patronymic,
+            func.group_concat(Course.course_name, ', ').label("courses"),
+            func.group_concat(Group.group_name, ', ').label("groups"),
+            func.sum(Salary.total_hours).label("total_hours"),
+            func.sum(Salary.total_salary).label("total_salary"),
+            func.max(Salary.hourly_rate).label("hourly_rate"),
+            Salary.month,
+            Salary.status,
+            Salary.payment_date
+        )
+        .join(Salary, Salary.teacher_id == Teacher.id)
+        .outerjoin(Course, Salary.course_id == Course.id)  
+        .outerjoin(Group, Salary.group_id == Group.id)  
+        .group_by(Teacher.id, Salary.month, Salary.status, Salary.payment_date)  
+        .paginate(page=page, per_page=per_page)
+    )
+    def format_month(date_str):
+        if date_str:
+            dt = datetime.strptime(date_str, "%Y-%m")
+            month_en = dt.strftime("%B")  # Получаем месяц на английском
+            month_ru = MONTHS_RU.get(month_en, month_en)  # Переводим на русский
+            return f"{month_ru} {dt.year}"
+        return "Не указан"
+
+    # Создаем новый список словарей (чтобы можно было редактировать)
+    salaries = []
+    for salary in salaries_pagination.items:
+        salaries.append({
+            "teacher_id": salary.teacher_id,
+            "surname": salary.surname,
+            "first_name": salary.first_name,
+            "patronymic": salary.patronymic,
+            "courses": ", ".join(set(salary.courses.split(", "))) if salary.courses else "Не указано",
+            "groups": ", ".join(set(salary.groups.split(", "))) if salary.groups else "Не указано",
+            "total_hours": salary.total_hours,
+            "total_salary": salary.total_salary,
+            "hourly_rate": salary.hourly_rate,
+            "month": format_month(salary.month),
+            "status": salary.status,
+            "payment_date": salary.payment_date
+        })
+
+    return render_template(
+        'salary_management.html', 
+        salaries=salaries,  
+        administrator=administrator, 
+        pagination=salaries_pagination  
+    )
 
 
 # Страница выхода

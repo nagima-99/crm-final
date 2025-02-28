@@ -1,0 +1,130 @@
+{% extends "base_administrator.html" %}
+
+{% block title %}Управление зарплатой учителей{% endblock %}
+
+{% block content %}
+<div class="management-form">
+<h2>Управление учителем</h2>
+
+<table class="student-table">
+    <thead>
+        <tr>
+            <th>ФИО</th>
+            <th>Курс</th>
+            <th>Группа</th>
+            <th>Месяц</th>
+            <th>Ставка за час</th>
+            <th>Количество часов</th>
+            <th>Сумма к выплате</th>
+            <th>Статус</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for salary in salaries %}
+        <tr>
+            <td>{{ salary.surname }} {{ salary.first_name }} {{ salary.patronymic }}</td>
+            <td>{{ salary.courses if salary.courses else "Не указан" }}</td>
+            <td>{{ salary.groups if salary.groups else "Не указана" }}</td>
+            <td>{{ salary.month }}</td>
+            <td>
+                <input type="number" value="{{ salary.hourly_rate }}" class="hourly-rate" data-id="{{ salary.id }}">
+            </td>
+            <td>{{ salary.total_hours }}</td>
+            <td>{{ salary.total_salary }}</td>
+            <td {% if salary.status == 'Ожидает оплаты' %} style="color: red;" {% else %} style="color: green;" {% endif %}>
+                {{ salary.status }}
+            </td>
+            <td>
+                {% if salary.status == 'Ожидает оплаты' %}
+                    <button class="pay-btn" data-id="{{ salary.id }}">Оплатить</button>
+                {% else %}
+                    Оплачено {{ salary.payment_date }}
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="pagination">
+      <!-- Пагинация -->
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('salary_management', page=pagination.prev_num) }}">Назад</a>
+    {% endif %}
+    
+    {% for page_num in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+        {% if page_num %}
+            {% if page_num == pagination.page %}
+                <span class="current">{{ page_num }}</span>
+            {% else %}
+                <a href="{{ url_for('salary_management', page=page_num) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            <span class="ellipsis">…</span>
+        {% endif %}
+    {% endfor %}
+    
+    {% if pagination.has_next %}
+        <a href="{{ url_for('salary_management', page=pagination.next_num) }}">Вперёд</a>
+    {% endif %}
+</div>
+</div>
+<style>
+.pay-btn {
+    background-color: #007bff; /* Синий цвет */
+    color: white; /* Белый текст */
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.pay-btn:hover {
+    background-color: #0056b3; /* Темно-синий при наведении */
+}
+
+</style>
+<script>
+document.querySelectorAll('.hourly-rate').forEach(input => {
+    input.addEventListener('change', function() {
+        fetch('/update_hourly_rate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                salary_id: this.dataset.id,
+                new_rate: this.value
+            })
+        }).then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  alert("Ставка обновлена!");
+                  location.reload();
+              } else {
+                  alert("Ошибка обновления ставки");
+              }
+          });
+    });
+});
+
+document.querySelectorAll('.pay-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        fetch('/pay_salary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ salary_id: this.dataset.id })
+        }).then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  alert("Зарплата оплачена!");
+                  location.reload();
+              } else {
+                  alert("Ошибка при оплате");
+              }
+          });
+    });
+});
+</script>
+
+{% endblock %}

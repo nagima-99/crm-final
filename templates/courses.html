@@ -3,7 +3,7 @@
 {% block title %}Курсы{% endblock %}
 
 {% block content %}
-{% with messages = get_flashed_messages(with_categories=true) %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div id="flash-messages">
                 {% for category, message in messages %}
@@ -12,11 +12,13 @@
             </div>
         {% endif %}
     {% endwith %}
+    
 <div class="course-form">
     <h2>Список курсов</h2>
-    <div class="course-btn-container">
-        <a href="{{ url_for('add_course') }}" class="add-course-link">Добавить курс</a>
+    <div class="course-btn-container"> 
+        <button id="openModal" class="add-course-link">Добавить курс</button>
     </div>
+    
     <table class="course-list-table">
         <thead>
             <tr>
@@ -40,8 +42,30 @@
             {% endfor %}
         </tbody>
     </table>
-     <!-- Пагинация -->
-     <div class="pagination">
+
+    <!-- Модальное окно -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <span id="cancelModal" class="close-btn">&times;</span>
+            <h2>Добавить новый курс</h2>
+            <div id="flash-messages-modal"></div>
+            <form id="addCourseForm">
+                <label for="courseName">Название курса:</label>
+                <input type="text" id="courseName" name="course_name" required>
+    
+                <label for="academicHours">Академические часы:</label>
+                <input type="number" id="academicHours" name="academic_hours" required>
+    
+                <label for="price">Абонемент:</label>
+                <input type="number" id="price" name="price" required>
+    
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Пагинация -->
+    <div class="pagination">
         {% if pagination.has_prev %}
             <a href="{{ url_for('list_courses', page=pagination.prev_num) }}">Назад</a>
         {% endif %}
@@ -63,4 +87,170 @@
         {% endif %}
     </div>
 </div>
+
+<style>
+    /* Стили для флеш-сообщений */
+    .flash-message {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .flash-message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .flash-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* Стили модального окна */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 10;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+        background-color: white;
+        position: absolute;
+        top: 15%;
+        left: 50%;
+        transform: translate(-50%, 0);
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        text-align: left;
+    }
+    #cancelModal {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #aaa;
+    }
+    #cancelModal:hover {
+        color: black;
+        cursor: pointer;
+    }
+    #addCourseForm label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+    #addCourseForm input, #addCourseForm textarea, #addCourseForm button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+    #addCourseForm button {
+        background-color: #007bff;
+        color: white;
+        font-size: 1em;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    #addCourseForm button:hover {
+        background-color: #0056b3;
+    }
+    /* Кнопка добавления */
+    .add-course-link {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    .add-course-link:hover {
+        background-color: #0056b3;
+    } 
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("courseModal");
+    const openModalBtn = document.getElementById("openModal");
+    const closeModalBtn = document.getElementById("cancelModal");
+    const form = document.getElementById("addCourseForm");
+    const flashMessagesModal = document.getElementById("flash-messages-modal");
+
+    // Открытие модального окна
+    openModalBtn.addEventListener("click", function () {
+        modal.style.display = "block";
+    });
+
+    // Закрытие модального окна
+    closeModalBtn.addEventListener("click", function () {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+    // Функция для вывода ошибок в модальном окне
+    function showFlashMessage(message, type) {
+        const flashMessage = document.createElement("div");
+        flashMessage.classList.add("flash-message", type);
+        flashMessage.textContent = message;
+        flashMessagesModal.appendChild(flashMessage);
+    }
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        // Очищаем старые сообщения
+        flashMessagesModal.innerHTML = '';
+
+        let courseData = {
+            course_name: document.getElementById("courseName").value,
+            academic_hours: document.getElementById("academicHours").value,
+            price: document.getElementById("price").value
+        };
+
+        fetch("{{ url_for('add_course') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(courseData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = "{{ url_for('list_courses') }}"; // Перезагрузка страницы после успешного добавления
+            } else {
+                if (data.errors) {
+                    // Показываем ошибки под полями
+                    showFlashMessage(data.errors, "error");
+                } else {
+                    // Показываем флеш-сообщение
+                    showFlashMessage(data.message, "error");
+                }
+            }
+        })
+        .catch(error => console.error("Ошибка:", error));
+    });
+});
+</script>
+
 {% endblock %}

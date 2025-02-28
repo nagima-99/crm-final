@@ -35,8 +35,10 @@
               <li><a href="{{ url_for('list_courses') }}" class="nav-link {% if request.endpoint == 'list_courses' %}active{% endif %}">Курсы</a></li>
               <li><a href="{{ url_for('list_groups') }}" class="nav-link {% if request.endpoint == 'list_groups' %}active{% endif %}">Группы</a></li>
               <li><a href="{{ url_for('management') }}" class="nav-link {% if request.endpoint == 'management' %}active{% endif %}">Управление учеником</a></li>
+              <li><a href="{{ url_for('salary_management') }}" class="nav-link {% if request.endpoint == 'salary_management' %}active{% endif %}">Управление учителем</a></li>
               <li><a href="{{ url_for('schedule_management') }}" class="nav-link {% if request.endpoint == 'schedule_management' %}active{% endif %}">Расписание</a></li>  
               <li><a href="{{ url_for('chat') }}" class="nav-link {% if request.endpoint == 'chat' %}active{% endif %}">Чат</a></li>  
+              <li><a href="{{ url_for('logout') }}" class="nav-link {% if request.endpoint == 'logout' %}active{% endif %}">Выход</a></li>  
             </ul>
           </aside>
           

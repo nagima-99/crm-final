@@ -95,6 +95,9 @@ class Schedule(db.Model):
     course = db.relationship('Course', backref='schedules')
     group = db.relationship('Group', backref='schedules')
     teacher = db.relationship('Teacher', backref='schedules')
+
+    attendances = db.relationship('Attendance', back_populates='event', cascade="all, delete-orphan")
+
     
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -102,7 +105,7 @@ class Attendance(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('student.student_id'), nullable=False)
     attended = db.Column(db.Boolean, default=False)
 
-    event = db.relationship('Schedule', backref='attendances')
+    event = db.relationship('Schedule', back_populates='attendances')
     student = db.relationship('Student', backref='attendances')
 
 class Payment(db.Model):
@@ -118,3 +121,22 @@ class Message(db.Model):
     recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     message = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.now)
+
+class Salary(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.teacher_id', ondelete="CASCADE"), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=True)  # Новый столбец
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=True)  # Новый столбец
+    month = db.Column(db.String(20), nullable=False)
+    total_hours = db.Column(db.Float, default=0)
+    hourly_rate = db.Column(db.Float, default=1500)  
+    total_salary = db.Column(db.Float, default=0)
+    status = db.Column(db.String(20), nullable=False, default='Ожидает оплаты')
+    payment_date = db.Column(db.Date, nullable=True)
+
+    teacher = db.relationship('Teacher', backref='salaries')
+    course = db.relationship('Course', backref='salaries')
+    group = db.relationship('Group', backref='salaries')
+
+    def update_salary(self):
+        self.total_salary = self.total_hours * self.hourly_rate
