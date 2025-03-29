@@ -1,20 +1,21 @@
-{% extends "base_administrator.html" %}
+{% extends "base_teacher.html" %}
 
-{% block title %}Обновить данные{% endblock %}
+{% block title %}Обновить данные учителя{% endblock %}
 
 {% block content %}
 {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div id="flash-messages">
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-<div class="update-user-form">
+    {% if messages %}
+        <div id="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="update-teacher-form">
     <h2>Обновить данные</h2>
-    <form method="POST" action="{{ url_for('update_user', id=user.id) }}">
+    <form method="POST" action="{{ url_for('update_teacher', id=user.id) }}">
         {{ form.hidden_tag() }}
         
         <div class="form-row">
@@ -42,11 +43,8 @@
         <div class="form-row">
             <div class="form-column">
                 <label for="birth_date">Дата рождения:</label>
-                <input type="date" id="birth_date" name="birth_date" class="input" 
-       value="{{ administrator.birth_date.strftime('%Y-%m-%d') if administrator.birth_date else '' }}">
-
+                {{ form.birth_date(class="input") }}
             </div>
-            
             <div class="form-column">
                 <label for="phone">Телефон:</label>
                 {{ form.phone(class="input") }}
@@ -59,15 +57,8 @@
                 {{ form.address(class="input") }}
             </div>
             <div class="form-column">
-                <label for="office_name">Название офиса:</label>
-                {{ form.office_name(class="input") }}
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-column">
-                <label for="office_address">Адрес офиса:</label>
-                {{ form.office_address(class="input") }}
+                <label for="education">Образование:</label>
+                {{ form.education(class="input") }}
             </div>
         </div>
 
@@ -88,7 +79,7 @@
 
         <button type="submit" class="btn">Обновить данные</button>
     </form>
-    <a href="{{ url_for('administrator_dashboard', id=administrator.id) }}" class="back-link">Назад</a>
+    <a href="{{ url_for('teacher_dashboard', id=user.id) }}" class="back-link">Назад</a>
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {

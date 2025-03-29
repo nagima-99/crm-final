@@ -29,7 +29,7 @@
     <div class="container">
         <aside>
             <ul>
-              <li><a href="{{ url_for('administrator_dashboard', id=administrator.id) }}" class="nav-link {% if request.endpoint == 'administrator_dashboard' %}active{% endif %}">Профиль</a></li>
+              <li><a href="{{ url_for('administrator_dashboard', id=administrator.admin_id) }}" class="nav-link {% if request.endpoint == 'administrator_dashboard' %}active{% endif %}">Профиль</a></li>
               <li><a href="{{ url_for('students_list') }}" class="nav-link {% if request.endpoint == 'students_list' %}active{% endif %}">Список учеников</a></li>
               <li><a href="{{ url_for('teachers_list') }}" class="nav-link {% if request.endpoint == 'teachers_list' %}active{% endif %}">Список преподавателей</a></li>
               <li><a href="{{ url_for('list_courses') }}" class="nav-link {% if request.endpoint == 'list_courses' %}active{% endif %}">Курсы</a></li>

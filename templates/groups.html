@@ -138,6 +138,14 @@
         var flashMessageDiv = $('<div class="flash-message ' + category + '">' + message + '</div>');
         $('#flash-messages-modal').html(flashMessageDiv);
     }
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000); // 4 секунды
+        });
+    });
 </script>
 
 <!-- Добавьте стиль для модального окна -->

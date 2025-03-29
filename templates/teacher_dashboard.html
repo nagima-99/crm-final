@@ -1,0 +1,109 @@
+{% extends "base_teacher.html" %}
+
+{% block title %}Профиль учителя{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<section class="profile-container">
+    <div class="profile-header">
+        <h2>Добро пожаловать {{ teacher.first_name }} {{ teacher.surname }}</h2>
+    </div>
+
+    <div class="profile-body">
+        <div class="profile-photo-section">
+            <h3>Фото</h3>
+            <div class="profile-photo-container">
+                <div id="photo-clickable-container" class="photo-clickable-container">
+                    {% if user.photo %}
+                        <img src="{{ url_for('static', filename='uploads/' + user.photo) }}" alt="Фото пользователя" class="profile-photo" id="current-photo">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/default.png') }}" alt="Фото пользователя" class="profile-photo" id="current-photo">
+                    {% endif %}
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_photo', id=teacher.teacher_id) }}" class="upload-photo-form" id="upload-photo-form">
+                    <input type="file" name="photo" id="photo" accept="image/*" class="upload-input" style="display:none;">
+                    <button type="submit" class="btn btn-upload">Загрузить</button>
+                </form>
+            </div>
+
+            {% if user.photo %}
+                <form method="POST" action="{{ url_for('delete_photo', id=user.id) }}" class="delete-photo-form">
+                    <button type="submit" class="btn btn-danger">Удалить фото</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <div class="profile-details">
+            <h3>Личные данные</h3>
+            <div class="profile-info">
+                <div class="profile-item">
+                    <strong>Дата рождения:</strong> <span>{{ teacher.birth_date }}</span>
+                </div>
+                <div class="profile-item">
+                    <strong>Возраст:</strong> <span>{{ age }}</span>
+                </div>
+                <div class="profile-item">
+                    <strong>Телефон:</strong> <span>{{ teacher.phone or "Не указано" }}</span>
+                </div>
+                <div class="profile-item">
+                    <strong>Адрес:</strong> <span>{{ teacher.address or "Не указано" }}</span>
+                </div>
+                <div class="profile-item">
+                    <strong>Образование:</strong> <span>{{ teacher.education or "Не указано" }}</span>
+                </div>
+                <div class="profile-item">
+                    <strong>Email:</strong> <span>{{ user.email }}</span>
+                </div>
+            </div>
+            <a href="{{ url_for('update_teacher', id=teacher.teacher_id) }}" class="btn btn-update">Обновить информацию</a>
+        </div>      
+    </div>
+    <div class="profile-office">
+        <h3>Информация о курсах</h3>
+        <div class="course-container">
+            <strong>Преподаваемые курсы:</strong>
+            <div class="course-list">
+                {% for course in courses %}
+                    <span class="course-item">{{ course.course_name }} ({{ course.academic_hours }} часов)</span>
+                {% else %}
+                    <span class="course-item">Не назначены</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>  
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000); // 4 секунды
+        });
+    });
+    const photoContainer = document.getElementById("photo-clickable-container");
+    const photoInput = document.getElementById("photo");
+
+    photoContainer.addEventListener("click", function() {
+        photoInput.click();
+    });
+
+    photoInput.addEventListener("change", function() {
+        if (photoInput.files.length > 0) {
+            document.getElementById("upload-photo-form").submit();
+        }
+    });
+</script>
+
+{% endblock %}

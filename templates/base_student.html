@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Подключаем стили для учителя -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/base_administrator.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/student_dasboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/update_student.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/management.css') }}">
+
+    <title>{% block title %}CRM Ученика{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1 class="header-title">VIVACRM</h1>
+    </header>
+
+    <div class="container">
+        <aside>
+            <ul>
+              <li><a href="{{ url_for('student_dashboard', id=student.student_id) }}" class="nav-link {% if request.endpoint == 'student_dashboard' %}active{% endif %}">Профиль</a></li>
+              <li><a href="{{ url_for('schedule_management') }}" class="nav-link {% if request.endpoint == 'schedule_management' %}active{% endif %}">Расписание</a></li>  
+              <li><a href="{{ url_for('management') }}" class="nav-link {% if request.endpoint == 'management' %}active{% endif %}">Управление учеником</a></li>
+              <li><a href="{{ url_for('chat') }}" class="nav-link {% if request.endpoint == 'chat' %}active{% endif %}">Чат</a></li>  
+              <li><a href="{{ url_for('logout') }}" class="nav-link {% if request.endpoint == 'logout' %}active{% endif %}">Выход</a></li>  
+            </ul>
+        </aside>
+
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; CRM 2024</p>
+    </footer>
+</body>
+</html>

@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from forms import AdministratorForm, UpdateUserForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm
+from forms import AdministratorForm, UpdateUserForm, RegisterStudentForm, RegisterTeacherForm, CourseForm, GroupForm, UpdateTeacherForm, UpdateStudentForm
 from models import db, Users, Administrator, Teacher, Student, Course, Group, ManageStudent, Schedule, Attendance, Payment, Message, Salary
 from functools import wraps
 import logging
@@ -56,12 +56,12 @@ def calculate_age(birth_date):
     return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
 
 # Декоратор для проверки роли
-def role_required(role):
+def role_required(*roles):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            if not current_user.is_authenticated or current_user.role != role:
-                flash('Недостаточно прав доступа')
+            if not current_user.is_authenticated or current_user.role not in roles:
+                flash('Недостаточно прав доступа', 'danger')
                 return redirect(url_for('login'))
             return f(*args, **kwargs)
         return wrapped
@@ -82,14 +82,15 @@ def login():
         
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
+            flash('Добро пожаловать!', 'success')
             if user.role == 'Администратор':
                 return redirect(url_for('administrator_dashboard', id=user.id))
             elif user.role == 'Учитель':
-                return redirect(url_for('teacher_dashboard'))
+                return redirect(url_for('teacher_dashboard', id=user.id))
             elif user.role == 'Студент':
-                return redirect(url_for('student_dashboard'))
+                return redirect(url_for('student_dashboard', id=user.id))
         else:
-            flash('Неправильное имя пользователя или пароль')
+            flash('Неправильное имя пользователя или пароль', 'danger')
 
     return render_template('login.html')
 
@@ -103,7 +104,7 @@ def administrator_dashboard(id):
     # Получение данных администратора
     administrator = Administrator.query.filter_by(admin_id=id).first()
     if not administrator:
-        flash('Администратор не найден!')
+        flash('Администратор не найден!', 'danger')
         return redirect(url_for('login'))
 
     # Получение данных пользователя
@@ -130,6 +131,99 @@ def administrator_dashboard(id):
         age=age,
         form=form
     )
+
+@app.route('/student/<int:id>', methods=['GET'])
+@login_required
+@role_required('Студент')
+def student_dashboard(id):
+    print(f"ID из URL: {id}")
+    form = RegisterStudentForm()
+
+    # Получение данных студента
+    student = Student.query.filter_by(student_id=id).first()
+    courses = Course.query.join(ManageStudent).filter(ManageStudent.student_id == id).distinct().all()
+    
+
+    if not student:
+        print(f"ID из URL: {id}, ID студента: {student}")
+
+        flash('Студент не найден!', 'danger')
+        return redirect(url_for('login')) 
+
+    # Получение данных пользователя
+    user = Users.query.get_or_404(student.student_id)
+
+    # Вычисление возраста
+    age = calculate_age(student.birth_date)
+
+    # Обработка фото
+    if form.photo.data:
+        photo = form.photo.data
+        filename = secure_filename(photo.filename)
+        photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        photo.save(photo_path)
+        user.photo = filename
+    else:
+        # Если фото не было загружено, оставить дефолтное
+        if not user.photo:
+            user.photo = 'default.png'
+    print(f"Передача student в шаблон: {student}")
+
+    # Рендеринг страницы профиля студента
+    return render_template(
+        'student_dashboard.html',
+        student=student,
+        user=user,
+        age=age,
+        courses=courses,
+        form=form
+    )
+
+
+@app.route('/teacher/<int:id>', methods=['GET'])
+@login_required
+@role_required('Учитель')
+def teacher_dashboard(id):
+    print(f"ID из URL: {id}")
+    form = RegisterTeacherForm()
+
+    # Получение данных учителя
+    teacher = Teacher.query.filter_by(teacher_id=id).first()
+    courses = Course.query.join(Schedule).filter(Schedule.teacher_id == id).distinct().all()
+    if not teacher:
+        print(f"ID из URL: {id}, ID учителя: {teacher}")
+
+        flash('Учитель не найден!', 'danger')
+        return redirect(url_for('login')) 
+
+    # Получение данных пользователя
+    user = Users.query.get_or_404(teacher.teacher_id)
+
+    # Вычисление возраста
+    age = calculate_age(teacher.birth_date)
+
+    # Обработка фото
+    if form.photo.data:
+        photo = form.photo.data
+        filename = secure_filename(photo.filename)
+        photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        photo.save(photo_path)
+        user.photo = filename
+    else:
+        # Если фото не было загружено, оставить дефолтное
+        if not user.photo:
+            user.photo = 'default.png'
+
+    # Рендеринг страницы профиля учителя
+    return render_template(
+        'teacher_dashboard.html',
+        teacher=teacher,
+        user=user,
+        age=age,
+        courses=courses,
+        form=form
+    )
+
 
 @app.route('/update_user/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -159,7 +253,19 @@ def update_user(id):
             # Преобразуем строку в объект date
             # Преобразуем строку в объект date
             if form.birth_date.data:
-                administrator.birth_date = form.birth_date.data 
+                print(f"Полученная дата из формы: {form.birth_date.data}")  # Отладка
+
+                if isinstance(form.birth_date.data, str):  # Преобразуем строку в дату
+                    administrator.birth_date = datetime.strptime(form.birth_date.data, "%Y-%m-%d").date()
+                else:
+                    administrator.birth_date = form.birth_date.data
+
+                print(f"Полученная дата из формы: {form.birth_date.data} (тип: {type(form.birth_date.data)})")
+                print(f"Дата перед коммитом: {administrator.birth_date} (тип: {type(administrator.birth_date)})")
+  # Проверка перед сохранением
+            else:
+                print("Дата рождения не передана!")
+            
 
             administrator.phone = form.phone.data
             administrator.address = form.address.data
@@ -195,8 +301,140 @@ def update_user(id):
     form.address.data = administrator.address
     form.office_name.data = administrator.office_name
     form.office_address.data = administrator.office_address
-
+    print(f"Дата, переданная в шаблон: {administrator.birth_date}")
     return render_template('update_user.html', form=form, administrator=administrator, user=user)
+
+@app.route('/update_student/<int:id>', methods=['GET', 'POST'])
+@login_required
+@role_required('Студент')
+def update_student(id):
+    user = Users.query.get_or_404(id)  # Получаем пользователя по ID
+    student = Student.query.filter_by(student_id=user.id).first_or_404()  # Получаем данные студента
+    form = UpdateStudentForm()
+
+    # Заполняем форму текущими значениями, если студент уже есть
+    if student.birth_date:
+        form.birth_date.data = student.birth_date
+
+    if form.validate_on_submit():
+        try:
+            # Проверка текущего пароля
+            if not user.check_password(form.current_password.data):
+                flash('Неправильный текущий пароль', 'danger')
+                return redirect(url_for('update_student', id=user.id))
+
+            # Обновляем данные пользователя
+            user.email = form.email.data
+            student.first_name = form.first_name.data
+            student.surname = form.surname.data
+            student.patronymic = form.patronymic.data
+
+            # Преобразуем строку в объект date
+            if form.birth_date.data:
+                student.birth_date = form.birth_date.data  
+
+            student.phone = form.phone.data
+            student.address = form.address.data
+            student.client_name = form.client_name.data
+            student.client_relation = form.client_relation.data
+            student.client_phone = form.client_phone.data
+
+            # Обновляем пароль, если он был изменен
+            if form.new_password.data:
+                user.set_password(form.new_password.data)
+            db.session.commit()
+            flash('Данные успешно обновлены!', 'success')
+            return redirect(url_for('student_dashboard', id=user.id))  # Редирект на профиль студента
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Ошибка при обновлении данных студента: {e}')
+            flash('Произошла ошибка при обновлении данных. Повторите попытку.', 'danger')
+
+    # Обработка ошибок формы
+    if form.errors:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{form[field].label.text}: {error}", "danger")
+
+    # Заполняем форму текущими значениями
+    form.email.data = user.email
+    form.first_name.data = student.first_name
+    form.surname.data = student.surname
+    form.patronymic.data = student.patronymic
+    form.birth_date.data = student.birth_date
+    form.phone.data = student.phone
+    form.address.data = student.address
+    form.client_name.data = student.client_name
+    form.client_relation.data = student.client_relation
+    form.client_phone.data = student.client_phone
+
+    return render_template('update_student.html', form=form, student=student, user=user)
+
+
+@app.route('/update_teacher/<int:id>', methods=['GET', 'POST'])
+@login_required
+@role_required('Учитель')
+def update_teacher(id):
+    user = Users.query.get_or_404(id)  # Получаем пользователя по ID
+    teacher = Teacher.query.filter_by(teacher_id=user.id).first_or_404()  # Находим учителя
+    form = UpdateTeacherForm()
+
+    # Преобразуем дату в datetime перед передачей в форму (если дата существует)
+    if teacher.birth_date:
+        form.birth_date.data = teacher.birth_date
+
+    if form.validate_on_submit():
+        try:
+            # Проверка текущего пароля
+            if not user.check_password(form.current_password.data):
+                flash('Неправильный текущий пароль', 'danger')
+                return redirect(url_for('update_teacher', id=user.id))  # Исправленный редирект
+
+            # Обновляем данные пользователя
+            user.email = form.email.data
+            teacher.first_name = form.first_name.data
+            teacher.surname = form.surname.data
+            teacher.patronymic = form.patronymic.data
+
+            # Преобразуем строку в объект date
+            if form.birth_date.data:
+                teacher.birth_date = form.birth_date.data  
+
+            teacher.phone = form.phone.data
+            teacher.address = form.address.data
+            teacher.education = form.education.data
+
+            # Обновляем пароль, если он был изменен
+            if form.new_password.data:
+                user.set_password(form.new_password.data)
+
+            db.session.commit()
+            flash('Данные успешно обновлены!', 'success')
+            return redirect(url_for('teacher_dashboard', id=user.id))  # Редирект по user.id
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f'Ошибка при обновлении данных учителя: {e}')
+            flash('Произошла ошибка при обновлении данных. Повторите попытку.', 'danger')
+
+    # Обработка ошибок формы (если есть)
+    if form.errors:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{form[field].label.text}: {error}", "danger")
+
+    # Заполняем форму текущими данными
+    form.email.data = user.email
+    form.first_name.data = teacher.first_name
+    form.surname.data = teacher.surname
+    form.patronymic.data = teacher.patronymic
+    form.birth_date.data = teacher.birth_date
+    form.phone.data = teacher.phone
+    form.address.data = teacher.address
+    form.education.data = teacher.education
+
+    return render_template('update_teacher.html', form=form, teacher=teacher, user=user)
 
 
 @app.route('/upload_photo/<int:id>', methods=['POST'])
@@ -205,12 +443,12 @@ def upload_photo(id):
     user = Users.query.get_or_404(id)  # Получаем пользователя
 
     if 'photo' not in request.files:
-        flash('Файл не выбран')
+        flash('Файл не выбран', 'danger')
         return redirect(request.referrer)
 
     file = request.files['photo']
     if file.filename == '':
-        flash('Нет выбранного файла')
+        flash('Нет выбранного файла', 'danger')
         return redirect(request.referrer)
 
     if file:
@@ -233,13 +471,13 @@ def upload_photo(id):
         user.photo = filename
         db.session.commit()
 
-        flash('Фото успешно загружено')
+        flash('Фото успешно загружено', 'success')
         return redirect(request.referrer)  # Перенаправляем на страницу, с которой был отправлен запрос
 
 
 @app.route('/delete_photo/<int:id>', methods=['POST'])
 @login_required
-@role_required('Администратор')
+@role_required('Администратор', 'Учитель', 'Студент')
 def delete_photo(id):
     user = Users.query.get_or_404(id)
 
@@ -248,11 +486,19 @@ def delete_photo(id):
             os.remove(os.path.join(current_app.config['UPLOAD_FOLDER'], user.photo))
             user.photo = None
             db.session.commit()
-            flash('Фото успешно удалено!')
+            flash('Фото успешно удалено!', 'success')
         except Exception as e:
-            flash(f'Ошибка при удалении фотографии: {e}')
-    
-    return redirect(url_for('administrator_dashboard', id=id))
+            flash(f'Ошибка при удалении фотографии: {e}', 'danger')
+    # Перенаправляем пользователя на его панель
+    if user.role == 'Администратор':
+        return redirect(url_for('administrator_dashboard', id=id))
+    elif user.role == 'Учитель':
+        return redirect(url_for('teacher_dashboard', id=id))
+    elif user.role == 'Студент':
+        return redirect(url_for('student_dashboard', id=id))
+
+    # Если роль неизвестна, отправляем на главную
+    return redirect(url_for('login'))
 
 
 # Cписок учеников
@@ -283,7 +529,7 @@ def delete_student(id):
     # Ищем студента по ID
     student = Student.query.get(id)
     if not student:
-        flash("Студент не найден!")
+        flash("Студент не найден!", 'danger')
         return redirect(url_for('students_list'))
 
     # Удаляем связанного пользователя
@@ -294,7 +540,7 @@ def delete_student(id):
     db.session.delete(student)  # Удаляем студента из таблицы Student
     db.session.commit()  # Подтверждаем изменения в базе данных
 
-    flash("Студент и пользователь успешно удалены!")
+    flash("Студент и пользователь успешно удалены!", 'success')
     return redirect(url_for('students_list'))
 
 
@@ -325,7 +571,7 @@ def teachers_list():
 def delete_teacher(id):
     teacher = Teacher.query.get(id)
     if not teacher:
-        flash("Преподаватель не найден!")
+        flash("Преподаватель не найден!", 'danger')
         return redirect(url_for('teachers_list'))
 
     user = teacher.user  # Связанный пользователь
@@ -335,7 +581,7 @@ def delete_teacher(id):
     db.session.delete(teacher)
     db.session.commit()
 
-    flash("Преподаватель успешно удалены!")
+    flash("Преподаватель успешно удалены!", 'success')
     return redirect(url_for('teachers_list'))
 
 
@@ -350,7 +596,7 @@ def register_student():
     # Получаем текущего администратора
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     if not administrator:
-        flash('Администратор не найден!')
+        flash('Администратор не найден!', 'danger')
         return redirect(url_for('login'))
     
     if form.validate_on_submit():
@@ -403,7 +649,7 @@ def register_teacher():
     # Получаем текущего администратора (текущий пользователь)
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     if not administrator:
-        flash('Администратор не найден!')
+        flash('Администратор не найден!', 'danger')
         return redirect(url_for('login'))
     
     if form.validate_on_submit():
@@ -636,35 +882,73 @@ def list_groups():
 
 @app.route('/management', methods=['GET'])
 @login_required
-@role_required('Администратор')
+@role_required('Администратор', 'Студент')
 def management():
-    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
-    
-    # Получаем текущую страницу из запроса, по умолчанию 1
-    page = request.args.get('page', 1, type=int)
-    per_page = 6 # Количество учеников на одной странице
-    # Пагинация
-    student_pagination = Student.query.paginate(page=page, per_page=per_page)
-    students = student_pagination.items  # Ученики текущей страницы
-
+    user = current_user
     courses = Course.query.all()
-    groups = Group.query.all()    
-
+    groups = Group.query.all()
     student_info = []
+
+    if user.role == 'Студент':
+        base_template = "base_student.html"
+        student = Student.query.filter_by(student_id=user.id).first()
+        if student:
+            payments = Payment.query.filter_by(student_id=student.student_id).order_by(Payment.payment_date.desc()).all()
+
+            manage_student_entry = ManageStudent.query.filter_by(student_id=student.student_id).first()
+            course = Course.query.get(manage_student_entry.course_id) if manage_student_entry else None
+            group = Group.query.get(manage_student_entry.group_id) if manage_student_entry else None
+
+            total_paid = db.session.query(db.func.sum(Payment.amount)).filter_by(student_id=student.student_id).scalar() or 0
+            total_attended = Attendance.query.filter_by(student_id=student.student_id, attended=True).count()
+
+            price_per_lesson = (course.price / course.academic_hours) if course else 0
+            balance = total_paid - (total_attended * price_per_lesson)
+            payment_status = "Оплачено" if balance > 0 else "Не оплачено"
+            # Пагинация платежей для студента
+            page = request.args.get('page', 1, type=int)
+            per_page = 5  # Сколько платежей на страницу
+            payments_paginated = Payment.query.filter_by(student_id=student.student_id)\
+                                            .order_by(Payment.payment_date.desc())\
+                                            .paginate(page=page, per_page=per_page)
+
+            student_info.append({
+                'student': student,
+                'course': course,
+                'group': group,
+                'balance': balance,
+                'payment_status': payment_status,
+                'payments': payments,
+            })
+
+        return render_template(
+            'management.html',
+            student_info=student_info,
+            courses=courses,
+            groups=groups,
+            base_template=base_template,
+            payments_paginated=payments_paginated,
+            student=student
+        )
+
+    # Админская часть
+    base_template = "base_administrator.html"
+    administrator = Administrator.query.filter_by(admin_id=user.id).first()
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
+    student_pagination = Student.query.paginate(page=page, per_page=per_page)
+    students = student_pagination.items
 
     for student in students:
         manage_student_entry = ManageStudent.query.filter_by(student_id=student.student_id).first()
         course = Course.query.get(manage_student_entry.course_id) if manage_student_entry else None
         group = Group.query.get(manage_student_entry.group_id) if manage_student_entry else None
 
-        # Считаем баланс
         total_paid = db.session.query(db.func.sum(Payment.amount)).filter_by(student_id=student.student_id).scalar() or 0
         total_attended = Attendance.query.filter_by(student_id=student.student_id, attended=True).count()
-        
+
         price_per_lesson = (course.price / course.academic_hours) if course else 0
         balance = total_paid - (total_attended * price_per_lesson)
-
-        # Определяем статус оплаты
         payment_status = "Оплачено" if balance > 0 else "Не оплачено"
 
         student_info.append({
@@ -681,8 +965,11 @@ def management():
         student_info=student_info,
         courses=courses,
         groups=groups,
-        student_pagination=student_pagination
+        student_pagination=student_pagination,
+        base_template=base_template
     )
+
+
 
 @app.route('/edit_management/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -727,7 +1014,7 @@ def edit_management(id):
             db.session.add(new_payment)
         
         db.session.commit()  # Сохраняем все изменения в базе данных
-        flash('Изменения сохранены!')
+        flash('Изменения сохранены!', 'success')
         return redirect(url_for('management'))
 
     return render_template(
@@ -744,17 +1031,81 @@ def edit_management(id):
 
 
 @app.route('/schedule_management')
+@login_required
+@role_required('Администратор', 'Учитель', 'Студент') 
 def schedule_management():
-    administrator = Administrator.query.filter_by(admin_id=current_user.id).first()  # Извлекаем объект администратора
-    courses = Course.query.all()  # Получаем все курсы
-    groups = Group.query.all()  # Получаем все группы
-    teachers = Teacher.query.all()  # Получаем всех преподавателей
+    user = current_user
 
-    return render_template('schedule_management.html', administrator=administrator, courses=courses, groups=groups, teachers=teachers)
+    administrator = None
+    teacher = None
+    student = None
+    courses = []
+    groups = []
+    teachers = []
+    full_name = ''
+    if user.role == 'Администратор':
+        base_template = "base_administrator.html"
+        administrator = Administrator.query.filter_by(admin_id=user.id).first()  # Извлекаем объект администратора
+        courses = Course.query.all()  # Получаем все курсы
+        groups = Group.query.all()  # Получаем все группы
+        teachers = Teacher.query.all()  # Получаем всех преподавателей
+
+    elif user.role == 'Учитель':  # Если преподаватель
+        base_template = "base_teacher.html"
+        teacher = Teacher.query.filter_by(teacher_id=user.id).first()  # Получаем объект преподавателя
+        if teacher:
+            courses = Course.query.join(Schedule).filter(Schedule.teacher_id == teacher.teacher_id).all()  
+            groups = Group.query.join(Schedule).filter(Schedule.teacher_id == teacher.teacher_id).all()  
+            teachers = [teacher]
+            print(f"Курсы для учителя: {[course.course_name for course in courses]}")
+            print(f"Группы для учителя: {[group.group_name for group in groups]}")
+    
+    elif user.role == 'Студент':  # Если ученик
+        base_template = "base_student.html"
+        student = Student.query.filter_by(student_id=user.id).first()  # Получаем объект студента
+        if student:
+            full_name = f"{student.surname} {student.first_name}"
+
+            # Получаем группу студента через таблицу ManageStudent
+            groups = Group.query.join(ManageStudent).filter(ManageStudent.student_id == student.student_id).all()
+            
+            # Получаем курсы, к которым относится студент
+            courses = Course.query.join(ManageStudent).filter(ManageStudent.student_id == student.student_id).all()
+
+
+    return render_template('schedule_management.html', user=user, base_template=base_template, 
+                    administrator=administrator, 
+                    courses=courses, 
+                    groups=groups, 
+                    teachers=teachers,
+                    teacher=teacher,
+                    student=student,         
+                    student_full_name=full_name 
+)
 
 @app.route('/get_events', methods=['GET'])
+@login_required
+@role_required('Администратор', 'Учитель', 'Студент') 
 def get_events():
-    events = Schedule.query.all()
+    user = current_user
+    events = []
+    
+    if user.role == 'Администратор':  # Если админ, загружаем все события
+        events = Schedule.query.all()
+    elif user.role == 'Учитель':  # Если учитель, загружаем только его занятия
+        teacher = Teacher.query.filter_by(teacher_id=user.id).first()
+        if teacher:
+            events = Schedule.query.filter_by(teacher_id=teacher.teacher_id).all()
+    elif user.role == 'Студент':  # Для студента загружаем только его события
+        student = Student.query.filter_by(student_id=user.id).first()
+        if student:
+            # Получаем группы студента через ManageStudent
+            student_groups = db.session.query(ManageStudent.group_id).filter_by(student_id=student.student_id).subquery()
+
+            # Фильтруем расписание по группам, в которых учится студент
+            events = Schedule.query.filter(Schedule.group_id.in_(student_groups.select())).all()
+
+            print(events)
     events_list = []
 
     for event in events:
@@ -848,59 +1199,123 @@ def delete_event():
 
 @app.route('/get_students', methods=['GET'])
 @login_required
-@role_required('Администратор')
+@role_required('Администратор', 'Учитель', 'Ученик')
 def get_students():
+    print("DEBUG: role_required прошли")
     group_id = request.args.get('group_id')
     print(f"Получен запрос с group_id: {group_id}")
     if not group_id:
         return jsonify({"error": "group_id is required"}), 400
 
-    students = db.session.query(Student).join(ManageStudent).filter(ManageStudent.group_id == group_id).all()
+    user = current_user
 
-    students_list = [
-        {"id": student.student_id, "full_name": f"{student.surname} {student.first_name}"}
-        for student in students
-    ]
-    
-    return jsonify(students_list)
+    # Если учитель, проверяем, ведет ли он в этой группе
+    if user.role == 'Учитель':
+        print(f"DEBUG: user.id = {user.id}")  
+
+        teacher = Teacher.query.filter_by(teacher_id=user.id).first()
+        print(f"DEBUG: teacher найден: {teacher}")
+
+        if not teacher:
+            return jsonify({"error": "Преподаватель не найден"}), 403
+
+        is_teaching = Schedule.query.filter_by(group_id=group_id, teacher_id=teacher.teacher_id).first()
+        print(f"DEBUG: Учитель {teacher.teacher_id}, group_id {group_id}, is_teaching: {is_teaching}")
+
+        if not is_teaching:
+            return jsonify({"error": "Доступ запрещен"}), 403
+
+
+        # Учителю можно увидеть весь список студентов группы
+        students = db.session.query(Student).join(ManageStudent).filter(ManageStudent.group_id == group_id).all()
+        students_list = [
+            {"id": student.student_id, "full_name": f"{student.surname} {student.first_name}"}
+            for student in students
+        ]
+        return jsonify(students_list)
+
+    # Если админ — выводим всех
+    if user.role == 'Администратор':
+        students = db.session.query(Student).join(ManageStudent).filter(ManageStudent.group_id == group_id).all()
+        students_list = [
+            {"id": student.student_id, "full_name": f"{student.surname} {student.first_name}"}
+            for student in students
+        ]
+        return jsonify(students_list)
+
+    # Если ученик — возвращаем только его ФИО
+    if user.role == 'Ученик':
+        student = Student.query.get(user.id)
+        if not student:
+            return jsonify({"error": "Ученик не найден"}), 403
+
+        in_group = ManageStudent.query.filter_by(student_id=student.student_id, group_id=group_id).first()
+        if not in_group:
+            return jsonify({"error": "Доступ запрещен"}), 403
+
+        # Возвращаем только данные ученика
+        student_info = {"id": student.student_id, "full_name": f"{student.surname} {student.first_name}"}
+        return jsonify([student_info])
 
 @app.route('/update_lesson_topic', methods=['POST'])
 @login_required
-@role_required('Администратор')
+@role_required('Администратор', 'Учитель')
 def update_lesson_topic():
     data = request.json
     event_id = data.get('event_id')
     lesson_topic = data.get('lesson_topic')
-    attendance_list = data.get('attendance', [])
+    attendance_list = set(data.get('attendance', []))  # Уникальные ID студентов, которые присутствовали
 
     if not event_id or not lesson_topic:
         return jsonify({"error": "event_id и lesson_topic обязательны"}), 400
 
-    # Находим событие в расписании
+    # Находим событие
     schedule = Schedule.query.get(event_id)
     if not schedule:
         return jsonify({"error": "Событие не найдено"}), 404
 
     schedule.lesson_topic = lesson_topic
 
-    # Проверяем, был ли этот урок уже учтён в зарплате
-    existing_attendance = Attendance.query.filter_by(event_id=event_id).count()
+    # Получаем текущие записи посещаемости
+    existing_attendance = {record.student_id: record for record in Attendance.query.filter_by(event_id=event_id)}
 
-    # Удаляем старую посещаемость (заменяем полностью)
-    Attendance.query.filter_by(event_id=event_id).delete()
+    # Добавляем новых студентов в базу
+    new_students = attendance_list - existing_attendance.keys()
+    for student_id in new_students:
+        new_attendance = Attendance(event_id=event_id, student_id=student_id, attended=True)
+        db.session.add(new_attendance)
 
-    # Добавляем новую посещаемость
-    for student_id in attendance_list:
-        attendance = Attendance(event_id=event_id, student_id=student_id, attended=True)
-        db.session.add(attendance)
+    # Удаляем студентов, которых больше нет в списке
+    students_to_remove = existing_attendance.keys() - attendance_list
+    for student_id in students_to_remove:
+        db.session.delete(existing_attendance[student_id])
 
-    # Начисляем зарплату ТОЛЬКО ЕСЛИ ранее посещаемости не было (т.е. это ПЕРВОЕ сохранение)
-    if existing_attendance == 0 and attendance_list:
+    # Начисление зарплаты (только при первом сохранении посещаемости)
+    if not existing_attendance and attendance_list:
         duration_hours = (datetime.combine(schedule.date, schedule.end_time) - datetime.combine(schedule.date, schedule.start_time)).total_seconds() / 3600
-        update_teacher_salary(schedule.teacher_id, duration_hours, schedule.course_id, schedule.group_id)
+
+        salary_entry = Salary.query.filter_by(
+            teacher_id=schedule.teacher_id,
+            course_id=schedule.course_id,
+            group_id=schedule.group_id
+        ).first()
+
+        if salary_entry:
+            salary_entry.total_hours += duration_hours
+            salary_entry.update_salary()
+        else:
+            new_salary_entry = Salary(
+                teacher_id=schedule.teacher_id,
+                course_id=schedule.course_id,
+                group_id=schedule.group_id,
+                month=schedule.date.strftime("%Y-%m"), 
+                total_hours=duration_hours
+            )
+            db.session.add(new_salary_entry)
 
     db.session.commit()
     return jsonify({"success": True})
+
 
 
 def get_chat_partners():
@@ -909,7 +1324,7 @@ def get_chat_partners():
     if current_user.role == 'Администратор':
         users = Users.query.filter(Users.role.in_(['Учитель', 'Студент'])).all()
     elif current_user.role == 'Учитель':
-        users = Users.query.filter_by(Users.role.in_(['Студент', 'Администратор'])).all() 
+        users = Users.query.filter(Users.role.in_(['Студент', 'Администратор'])).all() 
     elif current_user.role == 'Студент':
         users = Users.query.filter(Users.role.in_(['Учитель', 'Администратор'])).all()
     else:
@@ -936,25 +1351,78 @@ def get_full_name(user):
 
 @app.route('/chat')
 @login_required
-@role_required('Администратор')
+@role_required('Администратор', 'Учитель', 'Студент')
 def chat():
-    administrator = Users.query.filter_by(id=current_user.id).first() 
-    chat_partners = get_chat_partners()  
-    
+    user = current_user
+    base_template = (
+        "base_administrator.html" if user.role == "Администратор"
+        else "base_teacher.html" if user.role == "Учитель"
+        else "base_student.html"
+    )
+
+    teacher = None
+    student = None
+    administrator = None
+
+    if user.role == 'Учитель':
+        teacher = Teacher.query.filter_by(teacher_id=user.id).first()
+    if user.role == 'Студент':
+        student = Student.query.filter_by(student_id=user.id).first()
+    if user.role == 'Администратор':
+        administrator = Administrator.query.filter_by(admin_id=user.id).first()
+
+    # Выбор собеседников в зависимости от роли
+    if user.role == 'Студент':
+        # Берем курсы и группы, в которых он учится
+        student_courses = [enroll.course_id for enroll in student.enrollments]
+        student_groups = [enroll.group_id for enroll in student.enrollments]
+
+        # Находим учителей, которые ведут эти курсы или группы через расписание
+        teachers = Teacher.query.join(Schedule).filter(
+            (Schedule.course_id.in_(student_courses)) | 
+            (Schedule.group_id.in_(student_groups))
+        ).distinct().all()
+        teacher_users = [Users.query.filter_by(id=t.teacher_id).first() for t in teachers]
+
+        # Добавляем всех администраторов
+        admins = Users.query.filter_by(role='Администратор').all()
+        chat_partners = admins + teacher_users
+
+    elif user.role == 'Учитель':
+        # Берем курсы и группы, которые ведет учитель
+        teacher_schedules = Schedule.query.filter_by(teacher_id=teacher.teacher_id).all()
+        course_ids = list({s.course_id for s in teacher_schedules})
+        group_ids = list({s.group_id for s in teacher_schedules})
+
+        # Находим студентов из этих курсов и групп
+        students = Student.query.join(ManageStudent).filter(
+            (ManageStudent.course_id.in_(course_ids)) | 
+            (ManageStudent.group_id.in_(group_ids))
+        ).distinct().all()
+
+        student_users = [Users.query.filter_by(id=s.student_id).first() for s in students]
+        admins = Users.query.filter_by(role='Администратор').all()
+        chat_partners = admins + student_users
+
+    else:
+        # Администратор видит всех кроме себя
+        chat_partners = Users.query.filter(Users.id != user.id).all()
+
     print(f"Найдено пользователей: {len(chat_partners)}")
-    for user in chat_partners:
-        print(f"ID: {user.id}, Email: {user.email}, Role: {user.role}") 
-    
+    for u in chat_partners:
+        print(f"ID: {u.id}, Email: {u.email}, Role: {u.role}") 
+
     users = [
         {
-            "id": user.id,
-            "full_name": get_full_name(user), 
-            "photo": user.photo or "/static/uploads/default.png",
-            "role": user.role 
+            "id": u.id,
+            "full_name": get_full_name(u), 
+            "photo": url_for('static', filename='uploads/' + u.photo) if u.photo else url_for('static', filename='uploads/default.png'),
+            "role": u.role 
         }
-        for user in chat_partners
+        for u in chat_partners if u  # добавил проверку на None на случай косяков с выборкой
     ]
-    return render_template('chat.html', users=users, administrator=administrator)
+
+    return render_template('chat.html', users=users, base_template=base_template, teacher=teacher, administrator=administrator, student=student)
 
 
 @app.route('/send_message', methods=['POST'])
@@ -1070,7 +1538,7 @@ def on_schedule_added(teacher_id, course_id, group_id, date, start_time, end_tim
     
     # Проверяем, есть ли уже такая запись
     existing_schedule = Schedule.query.filter_by(teacher_id=teacher_id, course_id=course_id, group_id=group_id, date=date, start_time=start_time, end_time=end_time).first()
-    
+    print(existing_schedule)
     if not existing_schedule:
         # Создаем запись в расписании, если ее нет
         new_schedule = Schedule(
@@ -1094,9 +1562,11 @@ def update_hourly_rate():
     data = request.json
     salary_id = data.get('salary_id')
     new_rate = data.get('new_rate')
+    print(f"Получен запрос: salary_id={salary_id}, new_rate={new_rate}")
 
     salary = Salary.query.get(salary_id)
     if salary:
+        print(f"Зарплата ID: {salary.id}, Часы: {salary.total_hours}, Ставка: {salary.hourly_rate}")
         salary.hourly_rate = float(new_rate)
         salary.update_salary()  # Пересчет зарплаты
         db.session.commit()
@@ -1135,8 +1605,13 @@ MONTHS_RU = {
 
 @app.route('/salary_management')
 @login_required
-@role_required('Администратор')
+@role_required('Администратор', 'Учитель')
 def salary_management():
+    user = current_user
+    base_template = "base_administrator.html" if user.role == 'Администратор' else "base_teacher.html"
+    teacher = None
+    if user.role == 'Учитель':
+        teacher = Teacher.query.filter_by(teacher_id=user.id).first()
     administrator = Administrator.query.filter_by(admin_id=current_user.id).first()
     
     # Получаем текущую страницу из запроса, по умолчанию 1
@@ -1144,9 +1619,10 @@ def salary_management():
     per_page = 3
 
     # Запрос данных
-    salaries_pagination = (
+    query = (
         db.session.query(
-            Teacher.id.label("teacher_id"),
+            Salary.id,
+            Teacher.teacher_id.label("teacher_id"),
             Teacher.surname,
             Teacher.first_name,
             Teacher.patronymic,
@@ -1159,12 +1635,18 @@ def salary_management():
             Salary.status,
             Salary.payment_date
         )
-        .join(Salary, Salary.teacher_id == Teacher.id)
+        .join(Salary, Salary.teacher_id == Teacher.teacher_id)
         .outerjoin(Course, Salary.course_id == Course.id)  
         .outerjoin(Group, Salary.group_id == Group.id)  
         .group_by(Teacher.id, Salary.month, Salary.status, Salary.payment_date)  
-        .paginate(page=page, per_page=per_page)
     )
+    if user.role == 'Учитель' and teacher:
+        query = query.filter(Teacher.teacher_id == teacher.teacher_id)
+
+    # Группировка и пагинация
+    salaries_pagination = query.group_by(Teacher.id, Salary.month, Salary.status, Salary.payment_date) \
+                                .order_by(Salary.status.asc(), Salary.payment_date.desc()) \
+                                .paginate(page=page, per_page=per_page)
     def format_month(date_str):
         if date_str:
             dt = datetime.strptime(date_str, "%Y-%m")
@@ -1176,7 +1658,9 @@ def salary_management():
     # Создаем новый список словарей (чтобы можно было редактировать)
     salaries = []
     for salary in salaries_pagination.items:
+
         salaries.append({
+            "id": salary.id,
             "teacher_id": salary.teacher_id,
             "surname": salary.surname,
             "first_name": salary.first_name,
@@ -1195,7 +1679,10 @@ def salary_management():
         'salary_management.html', 
         salaries=salaries,  
         administrator=administrator, 
-        pagination=salaries_pagination  
+        pagination=salaries_pagination,
+        base_template=base_template,
+        teacher=teacher,
+        is_teacher=user.role == 'Учитель',
     )
 
 

@@ -61,15 +61,13 @@
                 </div>
                 <a href="{{ url_for('update_user', id=administrator.admin_id) }}" class="btn btn-update">Обновить информацию</a>
             </div>
-            <div class="profile-office">
-                <h3>Информация об офисе</h3>
-                <div class="profile-info">
-                    <div class="profile-item">
-                        <strong>Название офиса:</strong> <span>{{ administrator.office_name or "Не указано" }}</span>
-                    </div>
-                    <div class="profile-item">
-                        <strong>Адрес офиса:</strong> <span>{{ administrator.office_address or "Не указано" }}</span>
-                    </div>
+        </div>
+        <div class="profile-office">
+            <h3>Информация об офисе</h3>
+            <div class="profile-info">
+                <div class="profile-item office-info">
+                    <strong>Название офиса:</strong> <span>{{ administrator.office_name or "Не указано" }}</span>
+                    <strong>Адрес офиса:</strong> <span>{{ administrator.office_address or "Не указано" }}</span>
                 </div>
             </div>
         </div>
@@ -90,6 +88,14 @@
         if (photoInput.files.length > 0) {
             document.getElementById("upload-photo-form").submit(); // Отправляем форму
         }
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000); // 4 секунды
+        });
     });
 </script>
 

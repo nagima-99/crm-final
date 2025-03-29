@@ -1,60 +1,137 @@
-{% extends "base_administrator.html" %}
+{% extends base_template %}
 
 {% block content %}
 <div class="management-form">
   <h2>Управление студентами</h2>
 
-<table class="student-table">
-  <thead>
-    <tr>
-      <th>Фамилия</th>
-      <th>Имя</th>
-      <th>Курс</th>
-      <th>Группа</th>
-      <th>Баланс (₸)</th>
-      <th>Статус оплаты</th>
-      <th>Редактировать</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for entry in student_info %}
-    <tr>
-      <td>{{ entry.student.surname }}</td>
-      <td>{{ entry.student.first_name }}</td>
-      <td>{{ entry.course.course_name if entry.course else "Не назначен" }}</td>
-      <td>{{ entry.group.group_name if entry.group else "Не назначена" }}</td>
-      <td>{{ entry.balance }} ₸</td>
-      <td {% if entry.payment_status == 'Не оплачено' %} style="color: red;" {% else %} style="color: green;" {% endif %}>
-        {{ entry.payment_status }}
-      </td>      
-      <td class="actions">
-        <a href="{{ url_for('edit_management', id=entry.student.student_id) }}"class="btn-edit"><i class="fa fa-edit"></i></a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-      <!-- Пагинация -->
-      <div class="pagination">
-        {% if student_pagination.has_prev %}
-        <a href="{{ url_for('management', page=student_pagination.prev_num) }}">Назад</a>
-    {% endif %}
-    
-    {% for page_num in student_pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
-        {% if page_num %}
-            {% if page_num == student_pagination.page %}
-                <span class="current">{{ page_num }}</span>
-            {% else %}
-                <a href="{{ url_for('management', page=page_num) }}">{{ page_num }}</a>
-            {% endif %}
+  {% if current_user.role == 'Студент' %}
+  <!-- Таблица для студента с историей оплат -->
+  <table class="student-table">
+    <thead>
+      <tr>
+        <th>Фамилия</th>
+        <th>Имя</th>
+        <th>Курс</th>
+        <th>Группа</th>
+        <th>Дата оплаты</th>
+        <th>Сумма (₸)</th>
+        <th>Баланс (₸)</th>
+        <th>Статус оплаты</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in student_info %}
+        {% if entry.payments %}
+          {% for payment in entry.payments %}
+            <tr>
+              <td>{{ entry.student.surname }}</td>
+              <td>{{ entry.student.first_name }}</td>
+              <td>{{ entry.course.course_name if entry.course else "Не назначен" }}</td>
+              <td>{{ entry.group.group_name if entry.group else "Не назначена" }}</td>
+              <td>{{ payment.payment_date.strftime('%d.%m.%Y') }}</td>
+              <td>{{ payment.amount }} ₸</td>
+              <td>{{ entry.balance }} ₸</td>
+              <td {% if entry.payment_status == 'Не оплачено' %} style="color: red;" {% else %} style="color: green;" {% endif %}>
+                {{ entry.payment_status }}
+              </td>
+            </tr>
+          {% endfor %}
         {% else %}
-            <span class="ellipsis">…</span>
+          <tr>
+            <td>{{ entry.student.surname }}</td>
+            <td>{{ entry.student.first_name }}</td>
+            <td>{{ entry.course.course_name if entry.course else "Не назначен" }}</td>
+            <td>{{ entry.group.group_name if entry.group else "Не назначена" }}</td>
+            <td colspan="3" style="text-align:center;">Оплат нет</td>
+            <td>{{ entry.balance }} ₸</td>
+            <td {% if entry.payment_status == 'Не оплачено' %} style="color: red;" {% else %} style="color: green;" {% endif %}>
+              {{ entry.payment_status }}
+            </td>
+          </tr>
         {% endif %}
-    {% endfor %}
-    
-    {% if student_pagination.has_next %}
-        <a href="{{ url_for('management', page=student_pagination.next_num) }}">Вперёд</a>
+      {% endfor %}
+    </tbody>
+  </table>
+  <!-- Пагинация платежей -->
+    <!-- Пагинация истории оплат -->
+    <div class="pagination">
+      {% if payments_paginated.has_prev %}
+        <a href="{{ url_for('management', page=payments_paginated.prev_num) }}">Назад</a>
+      {% endif %}
+
+      {% for page_num in payments_paginated.iter_pages(left_edge=1, right_edge=1) %}
+        {% if page_num %}
+          {% if page_num == payments_paginated.page %}
+            <span class="current">{{ page_num }}</span>
+          {% else %}
+            <a href="{{ url_for('management', page=page_num) }}">{{ page_num }}</a>
+          {% endif %}
+        {% else %}
+          <span class="ellipsis">…</span>
+        {% endif %}
+      {% endfor %}
+
+      {% if payments_paginated.has_next %}
+        <a href="{{ url_for('management', page=payments_paginated.next_num) }}">Вперёд</a>
+      {% endif %}
+    </div>
+
+{% else %}
+  <!-- Стандартная таблица для администратора -->
+  <table class="student-table">
+    <thead>
+      <tr>
+        <th>Фамилия</th>
+        <th>Имя</th>
+        <th>Курс</th>
+        <th>Группа</th>
+        <th>Баланс (₸)</th>
+        <th>Статус оплаты</th>
+        <th>Редактировать</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in student_info %}
+        <tr>
+          <td>{{ entry.student.surname }}</td>
+          <td>{{ entry.student.first_name }}</td>
+          <td>{{ entry.course.course_name if entry.course else "Не назначен" }}</td>
+          <td>{{ entry.group.group_name if entry.group else "Не назначена" }}</td>
+          <td>{{ entry.balance }} ₸</td>
+          <td {% if entry.payment_status == 'Не оплачено' %} style="color: red;" {% else %} style="color: green;" {% endif %}>
+            {{ entry.payment_status }}
+          </td>
+          <td class="actions">
+            <a href="{{ url_for('edit_management', id=entry.student.student_id) }}" class="btn-edit"><i class="fa fa-edit"></i></a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+{% if student_pagination %}
+  <div class="pagination">
+    {% if student_pagination.has_prev %}
+      <a href="{{ url_for('management', page=student_pagination.prev_num) }}">Назад</a>
     {% endif %}
-      </div>
-</div>
+
+    {% for page_num in student_pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+      {% if page_num %}
+        {% if page_num == student_pagination.page %}
+          <span class="current">{{ page_num }}</span>
+        {% else %}
+          <a href="{{ url_for('management', page=page_num) }}">{{ page_num }}</a>
+        {% endif %}
+      {% else %}
+        <span class="ellipsis">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if student_pagination.has_next %}
+      <a href="{{ url_for('management', page=student_pagination.next_num) }}">Вперёд</a>
+    {% endif %}
+  </div>
+{% endif %}
+
 {% endblock %}

@@ -1,5 +1,4 @@
-{% extends "base_administrator.html" %}
-
+{% extends base_template %}
 {% block content %}
 
 <div class="content-btn">
@@ -334,6 +333,15 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales-all.js"></script>
 
 <script>
+    var userRole = "{{ user.role }}";
+    var currentUserName = "{{ student_full_name }}";
+    var currentUserId = "{{ user.id }}"; 
+
+    // Если роль не 'Администратор', скрываем кнопку
+    if (userRole !== 'Администратор') {
+        document.getElementById('addEventButton').style.display = 'none';
+        document.getElementById('deleteEventButton').style.display = 'none';
+    }
     document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var modal = document.getElementById('eventModal');
@@ -374,21 +382,27 @@
     // Загрузка списка студентов группы
     function loadStudents(groupId, attendance) {
         if (!groupId) return; // Предотвращаем ошибку, если groupId отсутствует
+        var attendanceList = document.getElementById('attendanceList');
+        attendanceList.innerHTML = '';
+
+        if (userRole === 'Студент') {
+            if (attendance.includes(parseInt(currentUserId))) {
+                attendanceList.innerHTML = `<div>${currentUserName} 🟢</div>`;
+            } else {
+                attendanceList.innerHTML = `<div>${currentUserName} 🔴</div>`;
+            }
+            return;
+        }
 
         fetch(`/get_students?group_id=${groupId}`)
             .then(response => response.json())
             .then(students => {
-                var attendanceList = document.getElementById('attendanceList');
-                attendanceList.innerHTML = '';
-
                 students.forEach(student => {
                     var checked = attendance.includes(student.id) ? 'checked' : '';
                     var studentItem = `
                         <div>
-                            <label>
-                                <input type="checkbox" class="attendance-checkbox" value="${student.id}" ${checked}>
-                                ${student.full_name}
-                            </label>
+                            <input type="checkbox" class="attendance-checkbox" name="attendance" value="${student.id}" ${checked}>
+                            ${student.full_name}
                         </div>
                     `;
                     attendanceList.innerHTML += studentItem;

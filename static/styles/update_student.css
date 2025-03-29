@@ -1,0 +1,124 @@
+/* Основной контейнер */
+.update-student-form {
+    width: 100%;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    min-height: calc(100vh - 160px);
+}
+
+/* Заголовок */
+.update-student-form h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 28px;
+    color: #007bff;
+}
+
+/* Группировка полей в строки */
+.update-student-form .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Колонки */
+.update-student-form .form-column {
+    flex: 1;
+    min-width: calc(50% - 10px);
+    max-width: 48%;
+}
+
+/* Подписи к полям */
+.update-student-form label {
+    display: block;
+    margin: 5px 0 5px;
+    font-weight: bold;
+}
+
+/* Поля ввода */
+.update-student-form .input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* Кнопка отправки */
+.update-student-form .btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.update-student-form .btn:hover {
+    background-color: #0056b3;
+}
+
+/* Поля для пароля */
+.update-student-form .form-row-pass {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.update-student-form .form-column-pass {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.form-column-pass:last-child {
+    margin-right: 0;
+}
+
+.form-column-pass .input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Ссылка "Назад" */
+.update-student-form .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 5px;
+    font-size: 16px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.update-student-form .back-link:hover {
+    text-decoration: underline;
+}
+
+/* Секция родителя/опекуна */
+.update-student-form h3 {
+    font-size: 22px;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+}
+
+/* Специальный стиль для родительских данных */
+.update-student-form .guardian-info {
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+}

@@ -110,3 +110,29 @@ table {
   border-radius: 8px; /* Закругленные углы */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для эффекта объема */
 }
+.payment-history {
+  background-color: #fff;
+}
+
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payment-table th, .payment-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.payment-table th {
+  background-color: #f9f9f9;
+  position: sticky;
+  top: 0;
+}
+.student-table th:nth-child(6), /* Баланс */
+.student-table th:nth-child(7), /* Статус оплаты */
+.student-table td:nth-child(6),
+.student-table td:nth-child(7) {
+    min-width: 120px; /*ы Или больше, если нужно */
+    text-align: center;
+}

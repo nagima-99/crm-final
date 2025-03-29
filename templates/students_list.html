@@ -65,5 +65,15 @@
       <a href="{{ url_for('students_list', page=pagination.next_num) }}">Вперёд</a>
   {% endif %}
 </div>
-  </div>
+</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000); // 4 секунды
+        });
+    });
+</script>
 {% endblock %}

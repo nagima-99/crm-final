@@ -33,4 +33,14 @@
     <a href="{{ url_for('list_courses') }}" class="back-link">Назад</a>
 </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000); // 4 секунды
+        });
+    });
+</script>
 {% endblock %}

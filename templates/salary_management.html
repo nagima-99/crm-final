@@ -1,4 +1,4 @@
-{% extends "base_administrator.html" %}
+{% extends base_template %}
 
 {% block title %}Управление зарплатой учителей{% endblock %}
 
@@ -17,7 +17,9 @@
             <th>Количество часов</th>
             <th>Сумма к выплате</th>
             <th>Статус</th>
-            <th>Действие</th>
+            {% if not is_teacher %}
+                <th>Действие</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -28,20 +30,26 @@
             <td>{{ salary.groups if salary.groups else "Не указана" }}</td>
             <td>{{ salary.month }}</td>
             <td>
+                {% if not is_teacher %}
                 <input type="number" value="{{ salary.hourly_rate }}" class="hourly-rate" data-id="{{ salary.id }}">
+                {% else %}
+                {{ salary.hourly_rate }}  <!-- Просто отображаем для учителя, без возможности редактирования -->
+            {% endif %}
             </td>
             <td>{{ salary.total_hours }}</td>
             <td>{{ salary.total_salary }}</td>
             <td {% if salary.status == 'Ожидает оплаты' %} style="color: red;" {% else %} style="color: green;" {% endif %}>
                 {{ salary.status }}
             </td>
-            <td>
+            {% if not is_teacher %}
+            <td>     
                 {% if salary.status == 'Ожидает оплаты' %}
                     <button class="pay-btn" data-id="{{ salary.id }}">Оплатить</button>
                 {% else %}
                     Оплачено {{ salary.payment_date }}
                 {% endif %}
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>

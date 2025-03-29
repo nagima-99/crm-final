@@ -89,3 +89,35 @@ body {
     background-position: center;
     position: relative;
 }
+
+#flash-messages {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 600px;
+}
+.flash-message {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    animation: fadeout 4s forwards;
+}
+.flash-message.success {
+    background-color: #28a745; /* Зеленый */
+}
+.flash-message.danger {
+    background-color: #dc3545; /* Красный */
+}
+.flash-message.info {
+    background-color: #17a2b8; /* Голубой */
+}
+.flash-message.warning {
+    background-color: #ffc107; /* Желтый */
+}

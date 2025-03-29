@@ -1,6 +1,7 @@
 /* Основные стили для страницы */
 .profile-container {
     width: 100%;
+    height: 80%;
     margin: 0px auto;
     padding: 20px;
     background: #ffffff;
@@ -104,22 +105,18 @@
 .profile-details h3 {
     font-size: 26px;
     color: #007bff;
-    margin-bottom: 20px;
     font-weight: bold;
 }
 
 /* Разделители между секциями */
 .profile-info {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
-    padding-bottom: 20px; /* Добавляем отступ снизу */
+    grid-template-columns: 1fr 1fr 1fr;
+    margin-top: 5px;
 }
 
 .profile-item {
     font-size: 16px;
-    margin-bottom: 12px;
     line-height: 1.5;
 }
 
@@ -131,11 +128,6 @@
 .profile-item span {
     color: #777;
 }
-.office-info strong{
-    display: block; /* Только для этого блока */
-    margin-top: 10px;
-
-} 
 
 .profile-info hr {
     width: 100%;
@@ -151,7 +143,6 @@
     margin: 30px 0;
 }
 
-
 .profile-office {
     width: 100%;
     padding: 20px;
@@ -161,10 +152,10 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+
 .profile-office h3 {
     font-size: 26px;
     color: #007bff;
-    margin-bottom: -20px;
 }
 
 /* Полосы/границы вокруг каждой секции */
@@ -189,7 +180,7 @@
     display: inline-block;
     text-decoration: none;
     transition: background-color 0.3s;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .btn:hover {
@@ -222,4 +213,36 @@
 
 .btn:hover {
     background-color: #0056b3;
+}
+
+#flash-messages {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 600px;
+}
+.flash-message {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    animation: fadeout 4s forwards;
+}
+.flash-message.success {
+    background-color: #28a745; /* Зеленый */
+}
+.flash-message.danger {
+    background-color: #dc3545; /* Красный */
+}
+.flash-message.info {
+    background-color: #17a2b8; /* Голубой */
+}
+.flash-message.warning {
+    background-color: #ffc107; /* Желтый */
 }

@@ -1,4 +1,4 @@
-{% extends "base_administrator.html" %}
+{% extends base_template %}
 
 {% block title %}Чат{% endblock %}
 
@@ -21,8 +21,9 @@
                        data-user-id="{{ user.id }}" 
                        data-role="{% if user.role == 'Учитель' %}teacher{% elif user.role == 'Студент' %}student{% else %}admin{% endif %}" 
                        data-name="{{ user.full_name }}" 
-                       data-avatar="{{ user.photo or '/static/uploads/default.png' }}">
-                        <img src="{{ user.photo or '/static/default-avatar.png' }}" alt="Аватар" class="user-avatar">
+                       data-avatar="{{ user.photo }}">
+                       <img src="{{ user.photo }}" alt="Аватар" class="user-avatar">
+                        
                         {{ user.full_name }} ({{ user.role }})
                     </a>
                 </li>
@@ -246,6 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
     height: 40px;
     border-radius: 50%;
     border: 2px solid #e0e0e0;
+    object-fit: cover;
 }
 
 /* Основной чат */
@@ -278,6 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 50%;
     border: 3px solid white;
     background: #f8f9fa;
+    object-fit: cover;
 }
 
 /* Окно сообщений */

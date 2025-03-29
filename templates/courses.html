@@ -190,7 +190,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const closeModalBtn = document.getElementById("cancelModal");
     const form = document.getElementById("addCourseForm");
     const flashMessagesModal = document.getElementById("flash-messages-modal");
-
+    const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000); // 4 секунды
+        });
     // Открытие модального окна
     openModalBtn.addEventListener("click", function () {
         modal.style.display = "block";
@@ -252,5 +257,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-
 {% endblock %}

@@ -1,22 +1,23 @@
-{% extends "base_administrator.html" %}
+{% extends "base_student.html" %}
 
-{% block title %}Обновить данные{% endblock %}
+{% block title %}Обновить данные ученика{% endblock %}
 
 {% block content %}
 {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div id="flash-messages">
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-<div class="update-user-form">
+    {% if messages %}
+        <div id="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="update-student-form">
     <h2>Обновить данные</h2>
-    <form method="POST" action="{{ url_for('update_user', id=user.id) }}">
+    <form method="POST" action="{{ url_for('update_student', id=user.id) }}">
         {{ form.hidden_tag() }}
-        
+
         <div class="form-row">
             <div class="form-column">
                 <label for="email">Электронная почта:</label>
@@ -27,7 +28,7 @@
                 {{ form.first_name(class="input") }}
             </div>
         </div>
-        
+
         <div class="form-row">
             <div class="form-column">
                 <label for="surname">Фамилия:</label>
@@ -42,11 +43,8 @@
         <div class="form-row">
             <div class="form-column">
                 <label for="birth_date">Дата рождения:</label>
-                <input type="date" id="birth_date" name="birth_date" class="input" 
-       value="{{ administrator.birth_date.strftime('%Y-%m-%d') if administrator.birth_date else '' }}">
-
+                {{ form.birth_date(class="input") }}
             </div>
-            
             <div class="form-column">
                 <label for="phone">Телефон:</label>
                 {{ form.phone(class="input") }}
@@ -58,19 +56,7 @@
                 <label for="address">Адрес:</label>
                 {{ form.address(class="input") }}
             </div>
-            <div class="form-column">
-                <label for="office_name">Название офиса:</label>
-                {{ form.office_name(class="input") }}
-            </div>
         </div>
-
-        <div class="form-row">
-            <div class="form-column">
-                <label for="office_address">Адрес офиса:</label>
-                {{ form.office_address(class="input") }}
-            </div>
-        </div>
-
         <div class="form-row-pass">
             <div class="form-column-pass">
                 <label for="current_password">Текущий пароль:</label>
@@ -85,18 +71,33 @@
                 {{ form.confirm_password(class="input") }}
             </div>
         </div>
-
+        <h3>Данные родителя/опекуна</h3>
+        <div class="form-row">
+            <div class="form-column-pass">
+                <label for="client_name">Имя родителя/опекуна:</label>
+                {{ form.client_name(class="input") }}
+            </div>
+            <div class="form-column-pass">
+                <label for="client_relation">Степень родства:</label>
+                {{ form.client_relation(class="input") }}
+            </div>
+            <div class="form-column-pass">
+                <label for="client_phone">Телефон родителя/опекуна:</label>
+                {{ form.client_phone(class="input") }}
+            </div>
+        </div>
         <button type="submit" class="btn">Обновить данные</button>
     </form>
-    <a href="{{ url_for('administrator_dashboard', id=administrator.id) }}" class="back-link">Назад</a>
+    <a href="{{ url_for('student_dashboard', id=user.id) }}" class="back-link">Назад</a>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const flashMessages = document.querySelectorAll('.flash-message');
         flashMessages.forEach(message => {
             setTimeout(() => {
                 message.style.display = 'none';
-            }, 5000); // 4 секунды
+            }, 5000); // 5 секунд
         });
     });
 </script>
