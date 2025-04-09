@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, DateField, IntegerField, FileField, SelectField
-from wtforms.validators import Optional, DataRequired, Email, EqualTo, Regexp, ValidationError, Length
+from wtforms.validators import Optional, DataRequired, Email, EqualTo, Regexp, ValidationError, Length, NumberRange
 from models import db, Users
 
 class AdministratorForm(FlaskForm):
@@ -300,8 +300,14 @@ class RegisterTeacherForm(FlaskForm):
 
 class CourseForm(FlaskForm):
     course_name = StringField('Название курса', validators=[DataRequired()])
-    academic_hours = IntegerField('Академические часы:', validators=[DataRequired()])
-    price = IntegerField('Абонемент', validators=[DataRequired()])
+    academic_hours = IntegerField('Академические часы:', validators=[
+        DataRequired(),
+        NumberRange(min=0, message="Количество часов не может быть отрицательным")
+    ])
+    price = IntegerField('Абонемент', validators=[
+        DataRequired(),
+        NumberRange(min=0, message="Цена не может быть отрицательной")
+    ])
 
 class GroupForm(FlaskForm):
     group_name = StringField('Название группы', validators=[DataRequired()])
