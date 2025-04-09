@@ -697,6 +697,14 @@ def register_teacher():
 def add_course():
     data = request.get_json()
     course_name = data.get('course_name')
+    academic_hours = data.get('academic_hours')
+    price = data.get('price')
+
+    # Проверка на отрицательные значения
+    if academic_hours is not None and int(academic_hours) < 0:
+        return jsonify({"success": False, "message": "Академические часы не могут быть отрицательными"})
+    if price is not None and int(price) < 0:
+        return jsonify({"success": False, "message": "Цена не может быть отрицательной"}) 
 
     # Пример проверки на существование курса
     existing_course = Course.query.filter_by(course_name=course_name).first()
