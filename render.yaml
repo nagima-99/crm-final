@@ -11,5 +11,14 @@ services:
         value: app.py
       - key: SECRET_KEY
         value: 7d1fb0e8b5fcbcb0acd1  # Секретный ключ
-
+      - key: DATABASE_URL  
+        value: "sqlite:///app.db"  
+      - key: PUSHER_APP_ID
+        value: "1942827"
+      - key: PUSHER_KEY
+        value: "625c8111a341758cd1e0"
+      - key: PUSHER_SECRET
+        value: "7d1fb0e8b5fcbcb0acd1"
+      - key: PUSHER_CLUSTER
+        value: "eu"
 

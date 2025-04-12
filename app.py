@@ -27,7 +27,7 @@ pusher_client = pusher.Pusher(
 # Конфигурация базы данных
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Отключаем лишние предупреждения
-app.config['SECRET_KEY'] = 'your_secret_key'  # Для защиты форм
+app.config['SECRET_KEY'] = '7d1fb0e8b5fcbcb0acd1'  # Для защиты форм
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
