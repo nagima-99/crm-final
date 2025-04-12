@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: crm-final
+    env: python
+    buildCommand: "pip install -r requirements.txt"  # Команда для установки зависимостей
+    startCommand: "gunicorn app:app"  # Команда для запуска приложения
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_APP
+        value: app.py
+      - key: SECRET_KEY
+        value: 7d1fb0e8b5fcbcb0acd1  # Секретный ключ
+
+
